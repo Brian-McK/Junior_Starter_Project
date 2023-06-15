@@ -1,14 +1,15 @@
 {
   "version": 2,
-  "dgSpecHash": "znxbiEoWmMEQ7tTGRdBUvUXVJDEVZr3i8Vza1n/bDeEcvtksIuTHhutC9DEbl5TbUdcVmQ/dEESZ4/JDUi4b1g==",
+  "dgSpecHash": "uSLwcdDbAci5plMDx07WY89oxP3Q5sLjOubCZC4stlAc8c/AnsnWZo486lhvrPepmqMMHGDlYPjQiFbCJ/sGCA==",
   "success": true,
   "projectFilePath": "C:\\Users\\brian.mckenna\\Documents\\BrianMcKenna_Kaseya_Project\\API\\API.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\brian.mckenna\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.aspnetcore.openapi\\7.0.5\\microsoft.aspnetcore.openapi.7.0.5.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
-    "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
+    "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.data.sqlclient\\5.1.1\\microsoft.data.sqlclient.5.1.1.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.data.sqlclient.sni.runtime\\5.1.0\\microsoft.data.sqlclient.sni.runtime.5.1.0.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.entityframeworkcore\\8.0.0-preview.5.23280.1\\microsoft.entityframeworkcore.8.0.0-preview.5.23280.1.nupkg.sha512",
