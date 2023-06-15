@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace API.Models;
 
@@ -19,10 +20,10 @@ public class Employee
     [Required]
     public string? Email { get; set; }
     
-    // add skill level ref here
-    [Required]
+    [ForeignKey("SkillLevelId")]
+    public virtual SkillLevel? SkillLevel { get; set; }
+    
     public bool IsActive { get; set; }
-
-    [Required]
+    
     public int Age { get; set; }
 }
