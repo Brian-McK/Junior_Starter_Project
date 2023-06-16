@@ -1,11 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace API.Models;
 
 public class Employee
 {
-    [Key]
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
     public Guid Id { get; set; }
     
     [Required]
@@ -20,8 +23,7 @@ public class Employee
     [Required]
     public string? Email { get; set; }
     
-    [ForeignKey("SkillLevelId")]
-    public virtual SkillLevel? SkillLevel { get; set; }
+    public SkillLevel? SkillLevel { get; set; }
     
     public bool IsActive { get; set; }
     
