@@ -28,13 +28,17 @@ public class EmployeeRepository: IEmployeeRepository
         await _mongoDbContext.Employees.InsertOneAsync(employee);
     }
 
-    public async Task UpdateAsync(Employee employee)
+    public async Task<bool> UpdateAsync(Employee employee)
     {
-        await _mongoDbContext.Employees.ReplaceOneAsync(p => p.Id == employee.Id, employee);
+      var updateResult = await _mongoDbContext.Employees.ReplaceOneAsync(p => p.Id == employee.Id, employee);
+
+      return updateResult.ModifiedCount > 0;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        await _mongoDbContext.Employees.DeleteOneAsync(p => p.Id == id);
+      var deleteResult = await _mongoDbContext.Employees.DeleteOneAsync(p => p.Id == id);
+
+      return deleteResult.DeletedCount > 0;
     }
 }

@@ -10,7 +10,7 @@ public interface IUserRepository
     
     Task AddAsync(User user);
     
-    Task UpdateAsync(User user);
+    Task<bool> UpdateAsync(User user);
     
-    Task DeleteAsync(Guid id);
+    Task<bool> DeleteAsync(Guid id);
 }

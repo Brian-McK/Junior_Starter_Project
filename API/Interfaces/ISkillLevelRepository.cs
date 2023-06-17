@@ -10,7 +10,7 @@ public interface ISkillLevelRepository
     
     Task AddAsync(SkillLevel skillLevel);
     
-    Task UpdateAsync(SkillLevel skillLevel);
+    Task<bool> UpdateAsync(SkillLevel skillLevel);
     
-    Task DeleteAsync(Guid id);
+    Task<bool> DeleteAsync(Guid id);
 }

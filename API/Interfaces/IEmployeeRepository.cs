@@ -10,7 +10,7 @@ public interface IEmployeeRepository
     
     Task AddAsync(Employee employee);
     
-    Task UpdateAsync(Employee employee);
+    Task<bool> UpdateAsync(Employee employee);
     
-    Task DeleteAsync(Guid id);
+    Task<bool> DeleteAsync(Guid id);
 }

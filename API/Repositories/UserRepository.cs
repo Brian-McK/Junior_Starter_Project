@@ -28,13 +28,17 @@ public class UserRepository: IUserRepository
         await _mongoDbContext.Users.InsertOneAsync(user);
     }
 
-    public async Task UpdateAsync(User user)
+    public async Task<bool> UpdateAsync(User user)
     {
-        await _mongoDbContext.Users.ReplaceOneAsync(p => p.Id == user.Id, user);
+       var updateResult = await _mongoDbContext.Users.ReplaceOneAsync(p => p.Id == user.Id, user);
+
+       return updateResult.ModifiedCount > 0;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        await _mongoDbContext.Users.DeleteOneAsync(p => p.Id == id);
+      var deleteResult = await _mongoDbContext.Users.DeleteOneAsync(p => p.Id == id);
+
+      return deleteResult.DeletedCount > 0;
     }
 }

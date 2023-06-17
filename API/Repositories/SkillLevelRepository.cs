@@ -28,13 +28,17 @@ public class SkillLevelRepository: ISkillLevelRepository
         await _mongoDbContext.SkillLevels.InsertOneAsync(skillLevel);
     }
 
-    public async Task UpdateAsync(SkillLevel skillLevel)
+    public async Task<bool> UpdateAsync(SkillLevel skillLevel)
     {
-        await _mongoDbContext.SkillLevels.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
+      var updateSkillLevelResult = await _mongoDbContext.SkillLevels.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
+
+      return updateSkillLevelResult.ModifiedCount > 0;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
-        await _mongoDbContext.SkillLevels.DeleteOneAsync(p => p.Id == id);
+       var deleteSkillLevelResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(p => p.Id == id);
+
+       return deleteSkillLevelResult.DeletedCount > 0;
     }
 }
