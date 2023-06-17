@@ -6,35 +6,35 @@ namespace API.Repositories;
 
 public class UserRepository: IUserRepository
 {
-    private readonly IMongoCollection<User> _userCollection;
+    private readonly IMongoDbContext _mongoDbContext;
     
-    public UserRepository(IMongoDatabase database)
+    public UserRepository(IMongoDbContext mongoDbContext)
     {
-        _userCollection = database.GetCollection<User>("Users");
+        _mongoDbContext = mongoDbContext;
     }
 
     public async Task<IEnumerable<User>> GetAllAsync()
     {
-        return await _userCollection.Find(_ => true).ToListAsync();
+        return await _mongoDbContext.Users.Find(_ => true).ToListAsync();
     }
 
     public async Task<User> GetByIdAsync(Guid id)
     {
-        return await _userCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+        return await _mongoDbContext.Users.Find(p => p.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(User user)
     {
-        await _userCollection.InsertOneAsync(user);
+        await _mongoDbContext.Users.InsertOneAsync(user);
     }
 
     public async Task UpdateAsync(User user)
     {
-        await _userCollection.ReplaceOneAsync(p => p.Id == user.Id, user);
+        await _mongoDbContext.Users.ReplaceOneAsync(p => p.Id == user.Id, user);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        await _userCollection.DeleteOneAsync(p => p.Id == id);
+        await _mongoDbContext.Users.DeleteOneAsync(p => p.Id == id);
     }
 }

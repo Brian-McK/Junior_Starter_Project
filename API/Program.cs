@@ -6,11 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.Configure<EmployeeSkillsDatabaseSettings>(
-    builder.Configuration.GetSection("EmployeeSkillsDatabase"));
-
-var hi = builder.Services.Configure<EmployeeSkillsDatabaseSettings>(
-    builder.Configuration.GetSection("EmployeeSkillsDatabase"));
-
+    builder.Configuration.GetSection("EmployeeSkillsDatabaseSettings"));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();

@@ -6,35 +6,35 @@ namespace API.Repositories;
 
 public class SkillLevelRepository: ISkillLevelRepository
 {
-    private readonly IMongoCollection<SkillLevel> _skillLevelCollection;
+    private readonly IMongoDbContext _mongoDbContext;
     
-    public SkillLevelRepository(IMongoDatabase database)
+    public SkillLevelRepository(IMongoDbContext mongoDbContext)
     {
-        _skillLevelCollection = database.GetCollection<SkillLevel>("SkillLevels");
+        _mongoDbContext = mongoDbContext;
     }
 
     public async Task<List<SkillLevel>> GetAllAsync()
     {
-        return await _skillLevelCollection.Find(_ => true).ToListAsync();
+        return await _mongoDbContext.SkillLevels.Find(_ => true).ToListAsync();
     }
 
     public async Task<SkillLevel> GetByIdAsync(Guid id)
     {
-        return await _skillLevelCollection.Find(p => p.Id == id).FirstOrDefaultAsync();
+        return await _mongoDbContext.SkillLevels.Find(p => p.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(SkillLevel skillLevel)
     {
-        await _skillLevelCollection.InsertOneAsync(skillLevel);
+        await _mongoDbContext.SkillLevels.InsertOneAsync(skillLevel);
     }
 
     public async Task UpdateAsync(SkillLevel skillLevel)
     {
-        await _skillLevelCollection.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
+        await _mongoDbContext.SkillLevels.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        await _skillLevelCollection.DeleteOneAsync(p => p.Id == id);
+        await _mongoDbContext.SkillLevels.DeleteOneAsync(p => p.Id == id);
     }
 }
