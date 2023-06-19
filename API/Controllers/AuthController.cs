@@ -20,6 +20,23 @@ public class AuthController: ControllerBase
     {
         _employeeSkillLevelService = employeeSkillLevelService;
     }
+    
+    [HttpPost]
+    [Route("register")]
+    public async Task<IActionResult> RegisterUser([FromBody] UserReqDto? registerUserDetails)
+    {
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerUserDetails.PasswordHash);
+    
+        var user = new User
+        {
+            Username = registerUserDetails.Username,
+            PasswordHash = passwordHash
+        };
+    
+        await _employeeSkillLevelService.AddUserAsync(user);
+    
+        return Ok(user);
+    }
 
     [HttpPost]
     public async Task<IActionResult> Authenticate([FromBody] UserReqDto? loginDetails)
