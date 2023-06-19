@@ -31,14 +31,12 @@ public class AuthController: ControllerBase
 
         var user = await _employeeSkillLevelService.GetUserByUsernameAsync(loginDetails.Username);
 
-        var token = "";
-
         if (user.Username == loginDetails.Username && user.PasswordHash == loginDetails.PasswordHash)
         {
-            token = GenerateJwtToken(user.Id);
+            return Ok(GenerateJwtToken(user.Id));
         }
         
-        return Created("/", token);
+        return Unauthorized();
     }
     
     private static string GenerateJwtToken(string userId)
