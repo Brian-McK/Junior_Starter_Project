@@ -1,6 +1,7 @@
 using API.Interfaces;
 using API.Models;
 using API.Repositories;
+using API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,9 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<EmployeeSkillsDatabaseSettings>(
     builder.Configuration.GetSection("EmployeeSkillsDatabaseSettings"));
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<ISkillLevelRepository, SkillLevelRepository>();
+builder.Services.AddSingleton<EmployeeSkillLevelService>();
 
 builder.Services.AddControllers();
 
