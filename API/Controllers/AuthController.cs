@@ -32,7 +32,13 @@ public class AuthController: ControllerBase
             Username = registerUserDetails.Username,
             PasswordHash = passwordHash
         };
-    
+        
+        // check if user with username exists first
+        if (_employeeSkillLevelService.GetUserByUsernameAsync(registerUserDetails.Username).Result.Username == registerUserDetails.Username)
+        {
+            return BadRequest();
+        }
+
         await _employeeSkillLevelService.AddUserAsync(user);
     
         return Ok(user);
@@ -48,12 +54,12 @@ public class AuthController: ControllerBase
 
         var user = await _employeeSkillLevelService.GetUserByUsernameAsync(loginDetails.Username);
 
-        if (user.Username == loginDetails.Username && user.PasswordHash == loginDetails.PasswordHash)
+        if (!(user.Username == loginDetails.Username && BCrypt.Net.BCrypt.Verify(user.PasswordHash, loginDetails.PasswordHash)))
         {
-            return Ok(GenerateJwtToken(user.Id));
+            return Unauthorized();
         }
         
-        return Unauthorized();
+        return Ok(GenerateJwtToken(user.Id));
     }
     
     private static string GenerateJwtToken(string userId)
