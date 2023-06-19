@@ -23,6 +23,11 @@ public class UserRepository: IUserRepository
     {
         return await _mongoDbContext.Users.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
+    
+    public async Task<User> GetUserByUsernameAsync(string username)
+    {
+        return await _mongoDbContext.Users.Find(p => p.Username != null && p.Username.Equals(username)).FirstOrDefaultAsync();
+    }
 
     public async Task AddAsync(User user)
     {

@@ -34,6 +34,13 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
 
         return user;
     }
+    
+    public async Task<User> GetUserByUsernameAsync(string username)
+    {
+        var user = await _userRepository.GetUserByUsernameAsync(username);
+
+        return user;
+    }
 
     public async Task AddUserAsync(User user)
     {

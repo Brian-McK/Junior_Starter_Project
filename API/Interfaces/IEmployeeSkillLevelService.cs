@@ -10,6 +10,8 @@ public interface IEmployeeSkillLevelService
     Task<IEnumerable<User>> GetAllUsersAsync();
     
     Task<User> GetUserByIdAsync(string id);
+
+    Task<User> GetUserByUsernameAsync(string username);
     
     Task AddUserAsync(User user);
     
