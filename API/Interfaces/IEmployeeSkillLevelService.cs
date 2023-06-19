@@ -15,7 +15,7 @@ public interface IEmployeeSkillLevelService
     
     Task<bool> UpdateUserAsync(User user);
     
-    Task<bool> DeleteUserAsync(Guid id);
+    Task<bool> DeleteUserAsync(string id);
 
     #endregion
 
@@ -29,7 +29,7 @@ public interface IEmployeeSkillLevelService
     
     Task<bool> UpdateEmployeeAsync(Employee employee);
     
-    Task<bool> DeleteEmployeeAsync(Guid id);
+    Task<bool> DeleteEmployeeAsync(string id);
 
     #endregion
     
@@ -43,7 +43,7 @@ public interface IEmployeeSkillLevelService
     
     Task<bool> UpdateSkillLevelAsync(SkillLevel skillLevel);
     
-    Task<bool> DeleteSkillLevelAsync(Guid id);
+    Task<bool> DeleteSkillLevelAsync(string id);
    
     #endregion
 }

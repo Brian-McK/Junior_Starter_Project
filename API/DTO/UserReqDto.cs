@@ -2,7 +2,7 @@
 
 namespace API.DTO;
 
-public class NewUserReqDto
+public class UserReqDto
 {
     public string? Username { get; set; }
     

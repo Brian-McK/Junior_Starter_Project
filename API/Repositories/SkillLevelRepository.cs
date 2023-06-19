@@ -19,7 +19,7 @@ public class SkillLevelRepository: ISkillLevelRepository
         return await _mongoDbContext.SkillLevels.Find(_ => true).ToListAsync();
     }
 
-    public async Task<SkillLevel> GetByIdAsync(Guid id)
+    public async Task<SkillLevel> GetByIdAsync(string id)
     {
         return await _mongoDbContext.SkillLevels.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
@@ -36,7 +36,7 @@ public class SkillLevelRepository: ISkillLevelRepository
       return updateSkillLevelResult.ModifiedCount > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(string id)
     {
        var deleteSkillLevelResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(p => p.Id.Equals(id));
 

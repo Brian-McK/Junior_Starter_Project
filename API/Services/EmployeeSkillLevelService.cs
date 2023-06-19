@@ -47,7 +47,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
         return isUpdatedUser;
     }
 
-    public async Task<bool> DeleteUserAsync(Guid id)
+    public async Task<bool> DeleteUserAsync(string id)
     {
         var isDeletedUser = await _userRepository.DeleteAsync(id);
 
@@ -84,7 +84,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
         return isUpdatedEmployee;
     }
 
-    public async Task<bool> DeleteEmployeeAsync(Guid id)
+    public async Task<bool> DeleteEmployeeAsync(string id)
     {
         var isDeletedEmployee = await _employeeRepository.DeleteAsync(id);
 
@@ -121,7 +121,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
         return isUpdatedSkillLevel;
     }
 
-    public async Task<bool> DeleteSkillLevelAsync(Guid id)
+    public async Task<bool> DeleteSkillLevelAsync(string id)
     {
         var isDeletedSkillLevel = await _skillLevelRepository.DeleteAsync(id);
 

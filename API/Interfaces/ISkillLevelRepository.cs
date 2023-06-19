@@ -12,5 +12,5 @@ public interface ISkillLevelRepository
     
     Task<bool> UpdateAsync(SkillLevel skillLevel);
     
-    Task<bool> DeleteAsync(Guid id);
+    Task<bool> DeleteAsync(string id);
 }

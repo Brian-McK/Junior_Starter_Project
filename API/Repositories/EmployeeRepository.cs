@@ -36,7 +36,7 @@ public class EmployeeRepository: IEmployeeRepository
       return updateResult.ModifiedCount > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(string id)
     {
       var deleteResult = await _mongoDbContext.Employees.DeleteOneAsync(p => p.Id.Equals(id));
 

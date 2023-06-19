@@ -19,7 +19,7 @@ public class UserRepository: IUserRepository
         return await _mongoDbContext.Users.Find(_ => true).ToListAsync();
     }
 
-    public async Task<User> GetByIdAsync(Guid id)
+    public async Task<User> GetByIdAsync(string id)
     {
         return await _mongoDbContext.Users.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
@@ -36,7 +36,7 @@ public class UserRepository: IUserRepository
        return updateResult.ModifiedCount > 0;
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(string id)
     {
       var deleteResult = await _mongoDbContext.Users.DeleteOneAsync(p => p.Id.Equals(id));
 
