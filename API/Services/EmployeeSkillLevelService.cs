@@ -28,7 +28,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
         return users;
     }
 
-    public async Task<User> GetUserByIdAsync(Guid id)
+    public async Task<User> GetUserByIdAsync(string id)
     {
         var user = await _userRepository.GetByIdAsync(id);
 
@@ -65,7 +65,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
         return employees;
     }
 
-    public async Task<Employee> GetEmployeeByIdAsync(Guid id)
+    public async Task<Employee> GetEmployeeByIdAsync(string id)
     {
         var employee = await _employeeRepository.GetByIdAsync(id);
 
@@ -102,7 +102,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
         return skillLevels;
     }
 
-    public async Task<SkillLevel> GetSkillLevelByIdAsync(Guid id)
+    public async Task<SkillLevel> GetSkillLevelByIdAsync(string id)
     {
         var skillLevel = await _skillLevelRepository.GetByIdAsync(id);
 

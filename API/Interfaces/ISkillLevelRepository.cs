@@ -6,7 +6,7 @@ public interface ISkillLevelRepository
 {
     Task<List<SkillLevel>> GetAllAsync();
     
-    Task<SkillLevel> GetByIdAsync(Guid id);
+    Task<SkillLevel> GetByIdAsync(string id);
     
     Task AddAsync(SkillLevel skillLevel);
     

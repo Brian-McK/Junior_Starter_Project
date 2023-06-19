@@ -1,6 +1,9 @@
-﻿using API.Interfaces;
+﻿using API.DTO;
+using API.Interfaces;
+using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace API.Controllers;
 
@@ -25,10 +28,27 @@ public class UsersController: ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(string id)
     {
-        var guid = Guid.Parse(id);
-        
-        var user = await _employeeSkillLevelService.GetUserByIdAsync(guid);
+        var user = await _employeeSkillLevelService.GetUserByIdAsync(id);
 
         return Ok(user);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] NewUserReqDto? newUserReq)
+    {
+        if (newUserReq == null)
+        {
+            return BadRequest();
+        }
+        
+        var newUser = new User
+        {
+            Username = newUserReq.Username,
+            PasswordHash = newUserReq.PasswordHash
+        };
+            
+        await _employeeSkillLevelService.AddUserAsync(newUser);
+
+        return CreatedAtAction(nameof(GetUserById), new { id = newUser.Id }, newUser);
     }
 }

@@ -1,4 +1,5 @@
-﻿using API.Models;
+﻿using API.DTO;
+using API.Models;
 
 namespace API.Interfaces;
 
@@ -8,7 +9,7 @@ public interface IEmployeeSkillLevelService
 
     Task<IEnumerable<User>> GetAllUsersAsync();
     
-    Task<User> GetUserByIdAsync(Guid id);
+    Task<User> GetUserByIdAsync(string id);
     
     Task AddUserAsync(User user);
     
@@ -22,7 +23,7 @@ public interface IEmployeeSkillLevelService
 
     Task<IEnumerable<Employee>> GetAllEmployeesAsync();
     
-    Task<Employee> GetEmployeeByIdAsync(Guid id);
+    Task<Employee> GetEmployeeByIdAsync(string id);
     
     Task AddEmployeeAsync(Employee employee);
     
@@ -36,7 +37,7 @@ public interface IEmployeeSkillLevelService
 
     Task<List<SkillLevel>> GetAllSkillLevelsAsync();
     
-    Task<SkillLevel> GetSkillLevelByIdAsync(Guid id);
+    Task<SkillLevel> GetSkillLevelByIdAsync(string id);
     
     Task AddSkillLevelAsync(SkillLevel skillLevel);
     

@@ -19,7 +19,7 @@ public class EmployeeRepository: IEmployeeRepository
         return await _mongoDbContext.Employees.Find(_ => true).ToListAsync();
     }
 
-    public async Task<Employee> GetByIdAsync(Guid id)
+    public async Task<Employee> GetByIdAsync(string id)
     {
         return await _mongoDbContext.Employees.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
