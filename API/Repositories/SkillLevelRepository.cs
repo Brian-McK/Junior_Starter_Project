@@ -1,4 +1,5 @@
-﻿using API.Interfaces;
+﻿using API.Data;
+using API.Interfaces;
 using API.Models;
 using MongoDB.Driver;
 
@@ -20,7 +21,7 @@ public class SkillLevelRepository: ISkillLevelRepository
 
     public async Task<SkillLevel> GetByIdAsync(Guid id)
     {
-        return await _mongoDbContext.SkillLevels.Find(p => p.Id == id).FirstOrDefaultAsync();
+        return await _mongoDbContext.SkillLevels.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(SkillLevel skillLevel)
@@ -37,7 +38,7 @@ public class SkillLevelRepository: ISkillLevelRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-       var deleteSkillLevelResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(p => p.Id == id);
+       var deleteSkillLevelResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(p => p.Id.Equals(id));
 
        return deleteSkillLevelResult.DeletedCount > 0;
     }

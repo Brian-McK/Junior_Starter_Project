@@ -1,3 +1,4 @@
+using API.Data;
 using API.Interfaces;
 using API.Models;
 using API.Repositories;
@@ -6,10 +7,13 @@ using API.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.Configure<EmployeeSkillsDatabaseSettings>(
-    builder.Configuration.GetSection("EmployeeSkillsDatabaseSettings"));
+builder.Services.AddSingleton<IMongoDbContext, MongoDbContext>();
 
-builder.Services.AddSingleton<EmployeeSkillLevelService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<ISkillLevelRepository, SkillLevelRepository>();
+
+builder.Services.AddScoped<IEmployeeSkillLevelService, EmployeeSkillLevelService>();
 
 builder.Services.AddControllers();
 

@@ -1,4 +1,5 @@
 ﻿using API.Interfaces;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -7,17 +8,16 @@ namespace API.Controllers;
 [Route("api/[controller]")]
 public class UsersController: ControllerBase
 {
-    private readonly IUserRepository _userRepository;
-    
-    public UsersController(IUserRepository userRepository)
+    private readonly IEmployeeSkillLevelService _employeeSkillLevelService;
+    public UsersController(IEmployeeSkillLevelService employeeSkillLevelService)
     {
-        _userRepository = userRepository;
+        _employeeSkillLevelService = employeeSkillLevelService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
-        var users = await _userRepository.GetAllAsync();
+        var users = await _employeeSkillLevelService.GetAllUsersAsync();
 
         return Ok(users);
     }
@@ -27,13 +27,8 @@ public class UsersController: ControllerBase
     {
         var guid = Guid.Parse(id);
         
-        var user = await _userRepository.GetByIdAsync(guid);
-        
-        if (user == null)
-        {
-            return NotFound();
-        }
-        
+        var user = await _employeeSkillLevelService.GetUserByIdAsync(guid);
+
         return Ok(user);
     }
 }

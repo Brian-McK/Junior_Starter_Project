@@ -9,7 +9,7 @@ public class Employee
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     
     [Required]
     public string? FirstName { get; set; }

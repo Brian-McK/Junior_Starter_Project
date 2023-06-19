@@ -6,15 +6,11 @@ namespace API.Data;
 
 public class MongoDbContext: IMongoDbContext
 {
-    public IMongoCollection<User> Users { get; }
-    public IMongoCollection<Employee> Employees { get; }
-    public IMongoCollection<SkillLevel> SkillLevels { get; }
-    
     public MongoDbContext(IConfiguration configuration)
     {
         var client = new MongoClient(configuration.GetValue<string>("EmployeeSkillsDatabaseSettings:ConnectionString"));
 
-        var db = client.GetDatabase(configuration.GetValue<string>("EmployeeSkillsDatabaseSettings:ConnectionString"));
+        var db = client.GetDatabase(configuration.GetValue<string>("EmployeeSkillsDatabaseSettings:DatabaseName"));
 
         Users = db.GetCollection<User>(
             configuration.GetValue<string>("EmployeeSkillsDatabaseSettings:UserCollectionName"));
@@ -25,4 +21,8 @@ public class MongoDbContext: IMongoDbContext
         SkillLevels = db.GetCollection<SkillLevel>(
             configuration.GetValue<string>("EmployeeSkillsDatabaseSettings:SkillLevelCollectionName"));
     }
+    
+    public IMongoCollection<User> Users { get; }
+    public IMongoCollection<Employee> Employees { get; }
+    public IMongoCollection<SkillLevel> SkillLevels { get; }
 }

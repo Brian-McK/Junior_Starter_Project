@@ -8,7 +8,7 @@ public class SkillLevel
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     
     [Required]
     public string? Name { get; set; }

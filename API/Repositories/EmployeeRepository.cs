@@ -1,4 +1,5 @@
-﻿using API.Interfaces;
+﻿using API.Data;
+using API.Interfaces;
 using API.Models;
 using MongoDB.Driver;
 
@@ -20,7 +21,7 @@ public class EmployeeRepository: IEmployeeRepository
 
     public async Task<Employee> GetByIdAsync(Guid id)
     {
-        return await _mongoDbContext.Employees.Find(p => p.Id == id).FirstOrDefaultAsync();
+        return await _mongoDbContext.Employees.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(Employee employee)
@@ -37,7 +38,7 @@ public class EmployeeRepository: IEmployeeRepository
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-      var deleteResult = await _mongoDbContext.Employees.DeleteOneAsync(p => p.Id == id);
+      var deleteResult = await _mongoDbContext.Employees.DeleteOneAsync(p => p.Id.Equals(id));
 
       return deleteResult.DeletedCount > 0;
     }
