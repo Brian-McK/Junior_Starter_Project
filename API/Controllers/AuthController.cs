@@ -59,7 +59,7 @@ public class AuthController: ControllerBase
 
         var user = await _employeeSkillLevelService.GetUserByUsernameAsync(loginDetails.Username);
 
-        if (!(user.Username == loginDetails.Username && BCrypt.Net.BCrypt.Verify(user.PasswordHash, loginDetails.PasswordHash)))
+        if (!(user.Username == loginDetails.Username && BCrypt.Net.BCrypt.Verify(loginDetails.PasswordHash, user.PasswordHash)))
         {
             return Unauthorized();
         }
