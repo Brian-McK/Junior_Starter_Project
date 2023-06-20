@@ -23,6 +23,13 @@ public class SkillLevelRepository: ISkillLevelRepository
     {
         return await _mongoDbContext.SkillLevels.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
+    
+    public async Task<SkillLevel> GetByNameAsync(string name)
+    {
+        var filter = Builders<SkillLevel>.Filter.Eq(u => u.Name, name);
+        
+        return await _mongoDbContext.SkillLevels.Find(filter).FirstOrDefaultAsync();
+    }
 
     public async Task AddAsync(SkillLevel skillLevel)
     {

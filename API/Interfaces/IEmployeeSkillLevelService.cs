@@ -41,6 +41,8 @@ public interface IEmployeeSkillLevelService
     
     Task<SkillLevel> GetSkillLevelByIdAsync(string id);
     
+    Task<SkillLevel> GetSkillLevelByNameAsync(string name);
+    
     Task AddSkillLevelAsync(SkillLevel skillLevel);
     
     Task<bool> UpdateSkillLevelAsync(SkillLevel skillLevel);

@@ -115,6 +115,13 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
 
         return skillLevel;
     }
+    
+    public async Task<SkillLevel> GetSkillLevelByNameAsync(string name)
+    {
+        var skillLevel = await _skillLevelRepository.GetByNameAsync(name);
+
+        return skillLevel;
+    }
 
     public async Task AddSkillLevelAsync(SkillLevel skillLevel)
     {

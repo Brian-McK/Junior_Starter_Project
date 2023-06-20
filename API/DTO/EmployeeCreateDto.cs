@@ -1,16 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
+using API.Models;
 
-namespace API.Models;
+namespace API.DTO;
 
-public class Employee
+public class EmployeeCreateDto
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; }
-    
     [Required]
     public string? FirstName { get; set; }
     
@@ -23,7 +17,7 @@ public class Employee
     [Required]
     public string? Email { get; set; }
     
-    public List<SkillLevel> SkillLevels { get; set; }
+    public SkillLevelCreateDto? SkillLevel { get; set; }
     
     public bool IsActive { get; set; }
     
