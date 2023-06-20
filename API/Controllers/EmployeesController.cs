@@ -19,7 +19,7 @@ public class EmployeesController: ControllerBase
         _employeeSkillLevelService = employeeSkillLevelService;
     }
     
-    [HttpGet, Authorize]
+    [HttpGet, Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAllEmployees()
     {
         var employees = await _employeeSkillLevelService.GetAllEmployeesAsync();
@@ -27,7 +27,7 @@ public class EmployeesController: ControllerBase
         return Ok(employees);
     }
     
-    [HttpGet("{id}")]
+    [HttpGet("{id}"), Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetEmployeeById(string? id)
     {
         if (id == null)
@@ -40,7 +40,7 @@ public class EmployeesController: ControllerBase
         return Ok(employee);
     }
     
-    [HttpPost]
+    [HttpPost, Authorize(Roles = "Admin")]
     public async Task<IActionResult> AddNewEmployee([FromBody] EmployeeCreateDto? newEmpReq)
     {
         if (newEmpReq == null)
@@ -70,5 +70,32 @@ public class EmployeesController: ControllerBase
         await _employeeSkillLevelService.AddEmployeeAsync(newEmployee);
         
         return CreatedAtAction(nameof(GetEmployeeById), new { id = newEmployee.Id }, newEmployee.Id);
+    }
+    
+    [HttpPut("{id}"), Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateEmployee(string? id, [FromBody] EmployeeEditDto? updateEmployeeReq)
+    {
+        if (updateEmployeeReq == null)
+        {
+            return BadRequest();
+        }
+        
+        var employee = await _employeeSkillLevelService.GetEmployeeByIdAsync(id);
+
+        if (employee == null)
+        {
+            return BadRequest();
+        }
+
+        employee.FirstName = updateEmployeeReq.FirstName;
+        employee.LastName = updateEmployeeReq.LastName;
+        employee.Dob = updateEmployeeReq.Dob;
+        employee.Email = updateEmployeeReq.Email;
+        employee.IsActive = updateEmployeeReq.IsActive;
+        employee.Age = updateEmployeeReq.Age;
+
+        var isUpdatedEmployee = await _employeeSkillLevelService.UpdateEmployeeAsync(employee);
+
+        return isUpdatedEmployee ? Ok(employee) : BadRequest();
     }
 }
