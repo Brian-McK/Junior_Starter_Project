@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "pgcayvHot3l1AQ5utQ1X/h1w6HU4bfZfVeyrSjRpwzvJaw4Yn8SYsmbfVUqQIJ+AzAw1U9Hmh3U6BVw6BcCKLQ==",
+  "dgSpecHash": "h4xfbayM3LLLnplA5+YySQuTwuqiM/F9Cg3TtROOQcpQKxw2SAvBR3WnvD2yj445WB1vTPpW2l9NTY87q5p3EQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\brian.mckenna\\Documents\\BrianMcKenna_Kaseya_Project\\API\\API.csproj",
   "expectedPackageFiles": [
@@ -11,6 +11,7 @@
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\azure.identity\\1.8.0\\azure.identity.1.8.0.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\dnsclient\\1.6.1\\dnsclient.1.6.1.nupkg.sha512",
+    "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\7.0.7\\microsoft.aspnetcore.authentication.jwtbearer.7.0.7.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.aspnetcore.openapi\\7.0.5\\microsoft.aspnetcore.openapi.7.0.5.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\brian.mckenna\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",

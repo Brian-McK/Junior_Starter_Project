@@ -1,6 +1,7 @@
 ﻿using API.DTO;
 using API.Interfaces;
 using API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
@@ -18,7 +19,7 @@ public class EmployeesController: ControllerBase
         _employeeSkillLevelService = employeeSkillLevelService;
     }
     
-    [HttpGet]
+    [HttpGet, Authorize]
     public async Task<IActionResult> GetAllEmployees()
     {
         var employees = await _employeeSkillLevelService.GetAllEmployeesAsync();
