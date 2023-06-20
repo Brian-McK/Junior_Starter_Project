@@ -23,7 +23,7 @@ public class Employee
     [Required]
     public string? Email { get; set; }
     
-    public List<SkillLevel> SkillLevels { get; set; }
+    public SkillLevel SkillLevel { get; set; }
     
     public bool IsActive { get; set; }
     

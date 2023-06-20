@@ -53,23 +53,20 @@ public class EmployeesController: ControllerBase
             LastName = newEmpReq.LastName,
             Dob = newEmpReq.Dob,
             Email = newEmpReq.Email,
-            SkillLevels = new List<SkillLevel>(),
             IsActive = newEmpReq.IsActive,
             Age = newEmpReq.Age
         };
 
-        var newSkillLevel = new SkillLevel
+        var skillLevelCheck = await _employeeSkillLevelService.GetSkillLevelByNameAsync(newEmpReq.SkillLevelName);
+
+        if (skillLevelCheck == null)
         {
-            Id = ObjectId.GenerateNewId().ToString(),
-            Name = newEmpReq.SkillLevel.Name,
-            Description = newEmpReq.SkillLevel.Description
-        };
-        
-        newEmployee.SkillLevels.Add(newSkillLevel);
-        
+            BadRequest("Skill level does not exist!");
+        }
+
+        newEmployee.SkillLevel = skillLevelCheck;
+
         await _employeeSkillLevelService.AddEmployeeAsync(newEmployee);
-        
-        await _employeeSkillLevelService.AddSkillLevelAsync(newSkillLevel);
         
         return CreatedAtAction(nameof(GetEmployeeById), new { id = newEmployee.Id }, newEmployee.Id);
     }

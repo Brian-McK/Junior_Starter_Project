@@ -17,7 +17,7 @@ public class EmployeeCreateDto
     [Required]
     public string? Email { get; set; }
     
-    public SkillLevelCreateDto? SkillLevel { get; set; }
+    public string? SkillLevelName { get; set; }
     
     public bool IsActive { get; set; }
     
