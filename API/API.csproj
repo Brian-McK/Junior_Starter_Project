@@ -15,6 +15,7 @@
         <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0-preview2.23159.1" />
         <PackageReference Include="MongoDB.Driver" Version="2.19.2" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
     </ItemGroup>
 
 </Project>
