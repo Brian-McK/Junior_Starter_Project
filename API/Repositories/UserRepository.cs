@@ -26,7 +26,9 @@ public class UserRepository: IUserRepository
     
     public async Task<User> GetUserByUsernameAsync(string username)
     {
-        return await _mongoDbContext.Users.Find(p => p.Username != null && p.Username.Equals(username)).FirstOrDefaultAsync();
+        var filter = Builders<User>.Filter.Eq(u => u.Username, username);
+        
+        return await _mongoDbContext.Users.Find(filter).FirstOrDefaultAsync();
     }
 
     public async Task AddAsync(User user)

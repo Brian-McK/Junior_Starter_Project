@@ -15,16 +15,27 @@ namespace API.Controllers;
 public class AuthController: ControllerBase
 {
     private readonly IEmployeeSkillLevelService _employeeSkillLevelService;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IEmployeeSkillLevelService employeeSkillLevelService)
+    public AuthController(IEmployeeSkillLevelService employeeSkillLevelService, IConfiguration configuration)
     {
         _employeeSkillLevelService = employeeSkillLevelService;
+        _configuration = configuration;
     }
     
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> RegisterUser([FromBody] UserReqDto? registerUserDetails)
     {
+
+        var findUser = await _employeeSkillLevelService.GetUserByUsernameAsync(registerUserDetails.Username);
+        
+        // check if user with username exists first
+        if (findUser != null)
+        {
+            return BadRequest();
+        }
+        
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerUserDetails.PasswordHash);
     
         var user = new User
@@ -33,12 +44,6 @@ public class AuthController: ControllerBase
             PasswordHash = passwordHash
         };
         
-        // check if user with username exists first
-        if (_employeeSkillLevelService.GetUserByUsernameAsync(registerUserDetails.Username).Result.Username == registerUserDetails.Username)
-        {
-            return BadRequest();
-        }
-
         await _employeeSkillLevelService.AddUserAsync(user);
     
         return Ok(user);
@@ -59,20 +64,18 @@ public class AuthController: ControllerBase
             return Unauthorized();
         }
         
-        return Ok(GenerateJwtToken(user.Id));
+        return Ok(GenerateJwtToken(user));
     }
     
-    private static string GenerateJwtToken(string userId)
+    private string GenerateJwtToken(User user)
     {
-        const string secretKey = "this is my custom Secret key for authentication";
-        
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:JWT_Token").Value!));
         
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userId)
+            new Claim(JwtRegisteredClaimNames.Sub, user.Username!)
         };
 
         var token = new JwtSecurityToken(
