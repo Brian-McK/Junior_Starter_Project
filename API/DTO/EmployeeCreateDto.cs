@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using API.Models;
+using MongoDB.Bson;
 
 namespace API.DTO;
 
@@ -17,7 +18,7 @@ public class EmployeeCreateDto
     [Required]
     public string? Email { get; set; }
     
-    public string? SkillLevelName { get; set; }
+    public List<string> SkillLevelIds { get; set; }
     
     public bool IsActive { get; set; }
     

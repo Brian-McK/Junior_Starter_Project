@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
 
 namespace API.Models;
 
@@ -23,7 +24,7 @@ public class Employee
     [Required]
     public string? Email { get; set; }
     
-    public SkillLevel SkillLevel { get; set; }
+    public List<ObjectId> SkillLevelIds { get; set; }
     
     public bool IsActive { get; set; }
     
