@@ -59,15 +59,11 @@ public class EmployeesController: ControllerBase
             IsActive = newEmpReq.IsActive,
             Age = newEmpReq.Dob!.Value.Year
         };
-        
-        newEmployee.SkillLevelIds.Insert(0, new ObjectId(newEmpReq.SkillLevelIds[0]));
 
-        // var skillLevelCheck = await _employeeSkillLevelService.GetSkillLevelByNameAsync(newEmpReq.SkillLevelName);
-        //
-        // if (skillLevelCheck == null)
-        // {
-        //     BadRequest("Skill level does not exist!");
-        // }
+        foreach (var newEmployeeSkillLevelId in newEmpReq.SkillLevelIds)
+        {
+            newEmployee.SkillLevelIds.Add(new ObjectId(newEmployeeSkillLevelId.ToString()));
+        }
 
         await _employeeSkillLevelService.AddEmployeeAsync(newEmployee);
         

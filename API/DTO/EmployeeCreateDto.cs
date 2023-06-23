@@ -21,6 +21,4 @@ public class EmployeeCreateDto
     public List<string> SkillLevelIds { get; set; }
     
     public bool IsActive { get; set; }
-    
-    public int Age { get; set; }
 }
