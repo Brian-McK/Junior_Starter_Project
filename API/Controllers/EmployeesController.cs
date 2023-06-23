@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace API.Controllers;
 
@@ -54,18 +55,19 @@ public class EmployeesController: ControllerBase
             LastName = newEmpReq.LastName,
             Dob = newEmpReq.Dob,
             Email = newEmpReq.Email,
+            SkillLevelIds = new List<ObjectId>(),
             IsActive = newEmpReq.IsActive,
-            Age = newEmpReq.Age
+            Age = newEmpReq.Dob!.Value.Year
         };
+        
+        newEmployee.SkillLevelIds.Insert(0, new ObjectId(newEmpReq.SkillLevelIds[0]));
 
-        var skillLevelCheck = await _employeeSkillLevelService.GetSkillLevelByNameAsync(newEmpReq.SkillLevelName);
-
-        if (skillLevelCheck == null)
-        {
-            BadRequest("Skill level does not exist!");
-        }
-
-        newEmployee.SkillLevel = skillLevelCheck;
+        // var skillLevelCheck = await _employeeSkillLevelService.GetSkillLevelByNameAsync(newEmpReq.SkillLevelName);
+        //
+        // if (skillLevelCheck == null)
+        // {
+        //     BadRequest("Skill level does not exist!");
+        // }
 
         await _employeeSkillLevelService.AddEmployeeAsync(newEmployee);
         
@@ -97,5 +99,18 @@ public class EmployeesController: ControllerBase
         var isUpdatedEmployee = await _employeeSkillLevelService.UpdateEmployeeAsync(employee);
 
         return isUpdatedEmployee ? Ok(employee) : BadRequest();
+    }
+    
+    [HttpDelete("{id}"), Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteEmployee(string? id)
+    {
+        if (id == null)
+        {
+            return BadRequest();
+        }
+        
+        var requestResult = await _employeeSkillLevelService.DeleteEmployeeAsync(id);
+
+        return requestResult ? Ok() : NotFound();
     }
 }
