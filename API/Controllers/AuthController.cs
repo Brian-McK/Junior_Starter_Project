@@ -38,7 +38,7 @@ public class AuthController: ControllerBase
             return BadRequest();
         }
         
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerUserDetails.PasswordHash);
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerUserDetails.Password);
     
         var user = new User
         {
@@ -61,7 +61,7 @@ public class AuthController: ControllerBase
 
         var user = await _employeeSkillLevelService.GetUserByUsernameAsync(loginDetails.Username);
 
-        if (!(user.Username == loginDetails.Username && BCrypt.Net.BCrypt.Verify(loginDetails.PasswordHash, user.PasswordHash)))
+        if (!(user.Username == loginDetails.Username && BCrypt.Net.BCrypt.Verify(loginDetails.Password, user.PasswordHash)))
         {
             return Unauthorized();
         }
@@ -71,31 +71,37 @@ public class AuthController: ControllerBase
         var refreshToken = GenerateRefreshToken();
         
         SetRefreshTokenToCookie(refreshToken);
-        
-        return Ok(jwtToken);
+
+        var authResponse = new AuthResponse
+        {
+            JwtToken = jwtToken,
+            RefreshToken = refreshToken.Token
+        };
+
+        return Ok(authResponse);
     }
 
-    [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken()
-    {
-        var refreshToken = Request.Cookies["refreshToken"];
-
-        if (!user.RefreshToken.Equals(refreshToken))
-        {
-            return Unauthorized("Invalid refresh token");
-        }
-        else if (user.TokenExpires < DateTime.Now)
-        {
-            return Unauthorized("Token has expired");
-        }
-
-        var token = GenerateJwtToken(user);
-
-        var newRefreshToken = GenerateRefreshToken();
-        SetRefreshTokenToCookie(newRefreshToken);
-
-        return Ok(token);
-    }
+    // [HttpPost("refresh-token")]
+    // public async Task<IActionResult> RefreshToken()
+    // {
+    //     var refreshToken = Request.Cookies["refreshToken"];
+    //
+    //     if (!user.RefreshToken.Equals(refreshToken))
+    //     {
+    //         return Unauthorized("Invalid refresh token");
+    //     }
+    //     else if (user.TokenExpires < DateTime.Now)
+    //     {
+    //         return Unauthorized("Token has expired");
+    //     }
+    //
+    //     var token = GenerateJwtToken(user);
+    //
+    //     var newRefreshToken = GenerateRefreshToken();
+    //     SetRefreshTokenToCookie(newRefreshToken);
+    //
+    //     return Ok(token);
+    // }
     
     private RefreshToken GenerateRefreshToken()
     {
@@ -134,13 +140,13 @@ public class AuthController: ControllerBase
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Username!),
+            new Claim(JwtRegisteredClaimNames.Name, user.Username!),
             new Claim(ClaimTypes.Role, "Admin")
         };
 
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(15),
+            expires: DateTime.UtcNow.AddMinutes(1),
             signingCredentials: credentials
         );
 

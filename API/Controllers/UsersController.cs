@@ -47,7 +47,7 @@ public class UsersController: ControllerBase
         var newUser = new User
         {
             Username = newUserReq.Username,
-            PasswordHash = newUserReq.PasswordHash
+            PasswordHash = newUserReq.Password
         };
             
         await _employeeSkillLevelService.AddUserAsync(newUser);
@@ -74,7 +74,7 @@ public class UsersController: ControllerBase
         {
             Id = user.Id,
             Username = newUserReq.Username,
-            PasswordHash = newUserReq.PasswordHash
+            PasswordHash = newUserReq.Password
         };
 
         var isUpdatedUser = await _employeeSkillLevelService.UpdateUserAsync(updatedUser);
