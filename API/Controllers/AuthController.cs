@@ -68,7 +68,7 @@ public class AuthController: ControllerBase
 
         var jwtToken = GenerateJwtToken(user);
 
-        var refreshToken = GenerateRefreshToken();
+        var refreshToken = GenerateRefreshToken(user.Username);
         
         SetRefreshTokenToCookie(refreshToken);
 
@@ -82,23 +82,46 @@ public class AuthController: ControllerBase
         return Ok(authResponse);
     }
 
-    [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken()
+    [HttpGet("refresh-token")]
+    public async Task<IActionResult> RefreshToken() // refresh token from redux state???
     {
-        var refreshToken = "eknfwnkergknrgwer";
-
-        if (refreshToken == null)
-        {
-            return Unauthorized("Invalid refresh token");
-        }
+        // get refresh token from http only cookie
         
-        // Create a JWT token handler
-        var tokenHandler = new JwtSecurityTokenHandler();
+        var cookieValues = Request.Cookies.ToDictionary(cookie => cookie.Key, cookie => cookie.Value);
+
+        if (cookieValues.Count > 0)
+        {
+            // Access the cookie key-value pairs
+            return Ok(cookieValues);
+        }
+        return NotFound();
+
+        // var refreshTokenFromCookie = Request.Cookies.
+        //
+        // // check if it exists
+        // if (refreshToken == null)
+        // {
+        //     return Unauthorized("Invalid refresh token");
+        // }
+        //
+        // // decrypt the refresh token
+        //
+        // // Create a JWT token handler
+        // var tokenHandler = new JwtSecurityTokenHandler();
+        //
+        // var validationParameters = new TokenValidationParameters
+        // {
+        //     ValidateIssuerSigningKey = true,
+        //     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Refresh_Token").Value!)),
+        //     ValidateIssuer = false,
+        //     ValidateAudience = false,
+        //     ClockSkew= TimeSpan.FromMinutes(0)
+        // };
         //
         // try
         // {
         //     // Validate and decrypt the JWT token
-        //     ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(refreshToken, validationParameters, out SecurityToken validatedToken);
+        //     var claimsPrincipal = tokenHandler.ValidateToken(refreshToken, validationParameters, out var validatedToken);
         //
         //     // Access the claims from the decrypted token
         //     var claims = claimsPrincipal.Claims;
@@ -116,26 +139,53 @@ public class AuthController: ControllerBase
         //     // Token validation failed
         //     // Handle the exception or error message accordingly
         // }
-        
-        // decrypt jwt here
-        
-        // get user id
-        
-        // get expiry
-        
-    
-        var newRefreshToken = GenerateRefreshToken();
-        SetRefreshTokenToCookie(newRefreshToken);
-    
-        return Ok(refr);
+        //
+        //
+        // // ensure user etc...
+        //
+        //
+        //
+        //
+        // // decrypt jwt here
+        //
+        // // get user id
+        //
+        // // get expiry
+        //
+        //
+        // var newRefreshToken = GenerateRefreshToken();
+        // SetRefreshTokenToCookie(newRefreshToken);
+        //
+        // return Ok(refreshToken);
     }
     
-    private RefreshToken GenerateRefreshToken()
+    private RefreshToken GenerateRefreshToken(string username)
     {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Refresh_Token").Value!));
+        
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Name, username!),
+            new Claim(ClaimTypes.Role, "Admin")
+        };
+
+        var token = new JwtSecurityToken(
+            claims: claims,
+            expires: DateTime.Now.AddDays(1),
+            signingCredentials: credentials
+        );
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        
+        var refreshTokenStr = tokenHandler.WriteToken(token);
+
         var refreshToken = new RefreshToken
         {
-            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-            Expires = DateTime.Now.AddDays(1),
+            CreatedDate = DateTime.Now,
+            Expires = token.ValidTo,
+            Token = refreshTokenStr
         };
 
         return refreshToken;
@@ -146,23 +196,18 @@ public class AuthController: ControllerBase
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true, // prevents client-side scripts accessing the data
-            Expires = refreshToken.Expires
+            Expires = refreshToken.Expires,
+            SameSite = SameSiteMode.None,
+            Secure = true
         };
         
         Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
-        
-        // below needs to be changed as tutorial is saving in memory - he recommended saving in db but 
-        var user = new User();
-
-        user.RefreshToken = refreshToken.Token;
-        user.TokenCreated = refreshToken.CreatedDate;
-        user.TokenExpires = refreshToken.Expires;
     }
 
     private string GenerateJwtToken(User user)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:JWT_Token").Value!));
-        
+
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]

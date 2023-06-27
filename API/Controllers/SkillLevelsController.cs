@@ -1,6 +1,7 @@
 ﻿using API.DTO;
 using API.Interfaces;
 using API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -16,7 +17,7 @@ public class SkillLevelsController: ControllerBase
         _employeeSkillLevelService = employeeSkillLevelService;
     }
     
-    [HttpGet]
+    [HttpGet, Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAllSkillLevels()
     {
         var skillLevels = await _employeeSkillLevelService.GetAllSkillLevelsAsync();

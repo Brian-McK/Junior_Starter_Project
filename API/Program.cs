@@ -44,20 +44,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("AppSettings:JWT_Token").Value!)),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            ClockSkew= TimeSpan.FromMinutes(0)
         };
     });
 
 builder.Services.AddCors(options =>  
-{  
-      
+{
     options.AddDefaultPolicy(  
         policy =>
         {
-            policy.WithOrigins("*")
+            policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
-                .AllowAnyOrigin();
+                .AllowCredentials();
         });  
 });  
 
