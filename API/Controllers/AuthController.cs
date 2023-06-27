@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Runtime.InteropServices.JavaScript;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -66,7 +67,7 @@ public class AuthController: ControllerBase
             return Unauthorized();
         }
 
-        var jwtToken = GenerateJwtToken(user);
+        var jwtToken = GenerateJwtToken(user.Username);
 
         var refreshToken = GenerateRefreshToken(user.Username);
         
@@ -82,81 +83,61 @@ public class AuthController: ControllerBase
         return Ok(authResponse);
     }
 
-    [HttpGet("refresh-token")]
-    public async Task<IActionResult> RefreshToken() // refresh token from redux state???
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] string username)
     {
-        // get refresh token from http only cookie
+        if (username == null)
+        {
+            return BadRequest();
+        }
         
-        var cookieValues = Request.Cookies.ToDictionary(cookie => cookie.Key, cookie => cookie.Value);
+        // get refresh token from http only cookie
+        var cookieRefreshToken = Request.Cookies.ToDictionary(cookie => cookie.Key, cookie => cookie.Value).FirstOrDefault();
 
-        if (cookieValues.Count > 0)
+        if (!cookieRefreshToken.Key.Contains("refreshToken") && !cookieRefreshToken.Value.IsNullOrEmpty())
         {
             // Access the cookie key-value pairs
-            return Ok(cookieValues);
+            return Unauthorized();
         }
-        return NotFound();
+        
+        // validate and decrypt token
+        var tokenHandler = new JwtSecurityTokenHandler();
+        
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Refresh_Token").Value!)),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew= TimeSpan.FromMinutes(0)
+        };
 
-        // var refreshTokenFromCookie = Request.Cookies.
-        //
-        // // check if it exists
-        // if (refreshToken == null)
-        // {
-        //     return Unauthorized("Invalid refresh token");
-        // }
-        //
-        // // decrypt the refresh token
-        //
-        // // Create a JWT token handler
-        // var tokenHandler = new JwtSecurityTokenHandler();
-        //
-        // var validationParameters = new TokenValidationParameters
-        // {
-        //     ValidateIssuerSigningKey = true,
-        //     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Refresh_Token").Value!)),
-        //     ValidateIssuer = false,
-        //     ValidateAudience = false,
-        //     ClockSkew= TimeSpan.FromMinutes(0)
-        // };
-        //
-        // try
-        // {
-        //     // Validate and decrypt the JWT token
-        //     var claimsPrincipal = tokenHandler.ValidateToken(refreshToken, validationParameters, out var validatedToken);
-        //
-        //     // Access the claims from the decrypted token
-        //     var claims = claimsPrincipal.Claims;
-        //     
-        //     // Process the claims as needed
-        //     foreach (Claim claim in claims)
-        //     {
-        //         string claimType = claim.Type;
-        //         string claimValue = claim.Value;
-        //         // Do something with the claims
-        //     }
-        // }
-        // catch (SecurityTokenException ex)
-        // {
-        //     // Token validation failed
-        //     // Handle the exception or error message accordingly
-        // }
-        //
-        //
-        // // ensure user etc...
-        //
-        //
-        //
-        //
-        // // decrypt jwt here
-        //
-        // // get user id
-        //
-        // // get expiry
-        //
-        //
-        // var newRefreshToken = GenerateRefreshToken();
-        // SetRefreshTokenToCookie(newRefreshToken);
-        //
-        // return Ok(refreshToken);
+        var principal = new ClaimsPrincipal();
+        var isValidDate = false;
+
+        try
+        {
+            // Validate and decrypt the JWT token
+            principal = tokenHandler.ValidateToken(cookieRefreshToken.Value, validationParameters, out var validatedToken);
+            isValidDate = validatedToken.ValidTo > DateTime.Now;
+        }
+        catch (SecurityTokenException ex)
+        {
+            Console.WriteLine(ex);
+        }
+        
+        var isAdmin = principal.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+            
+        var isUser = principal.HasClaim(c => c.Type == JwtRegisteredClaimNames.Name && c.Value == username);
+
+        if (!(isAdmin && isUser && isValidDate))
+        {
+            return Forbid();
+        }
+        
+        var newJwtToken = GenerateJwtToken(username);
+
+        return Ok(newJwtToken);
     }
     
     private RefreshToken GenerateRefreshToken(string username)
@@ -168,7 +149,7 @@ public class AuthController: ControllerBase
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Name, username!),
-            new Claim(ClaimTypes.Role, "Admin")
+            new Claim(ClaimTypes.Role, "Admin"),
         };
 
         var token = new JwtSecurityToken(
@@ -204,7 +185,7 @@ public class AuthController: ControllerBase
         Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
     }
 
-    private string GenerateJwtToken(User user)
+    private string GenerateJwtToken(string username)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:JWT_Token").Value!));
 
@@ -212,13 +193,13 @@ public class AuthController: ControllerBase
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Name, user.Username!),
+            new Claim(JwtRegisteredClaimNames.Name, username!),
             new Claim(ClaimTypes.Role, "Admin")
         };
 
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(1),
+            expires: DateTime.UtcNow.AddSeconds(10),
             signingCredentials: credentials
         );
 
