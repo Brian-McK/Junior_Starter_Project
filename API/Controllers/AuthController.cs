@@ -137,7 +137,9 @@ public class AuthController: ControllerBase
         
         var newJwtToken = GenerateJwtToken(username);
 
-        return Ok(newJwtToken);
+        var jsonResponse = new { Username = username, JwtToken = newJwtToken };
+
+        return Ok(jsonResponse);
     }
     
     private RefreshToken GenerateRefreshToken(string username)
