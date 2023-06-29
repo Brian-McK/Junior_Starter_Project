@@ -82,6 +82,19 @@ public class AuthController: ControllerBase
 
         return Ok(authResponse);
     }
+    
+    [HttpPost("logout")]
+    public ActionResult Logout()
+    {
+        // Remove the authentication cookie
+        Response.Cookies.Delete("refreshToken", new CookieOptions()
+        {
+            SameSite = SameSiteMode.None,
+            Secure = true,
+        });
+
+        return NoContent();
+    }
 
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] string username)
