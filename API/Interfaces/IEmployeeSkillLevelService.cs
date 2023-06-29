@@ -23,7 +23,7 @@ public interface IEmployeeSkillLevelService
 
     #region Employee
 
-    Task<IEnumerable<Employee>> GetAllEmployeesAsync();
+    Task<IEnumerable<EmployeeListSkillLevel>> GetAllEmployeesAsync();
     
     Task<Employee> GetEmployeeByIdAsync(string id);
     

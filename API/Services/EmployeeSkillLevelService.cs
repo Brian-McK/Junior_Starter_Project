@@ -1,4 +1,5 @@
-﻿using API.Interfaces;
+﻿using API.DTO;
+using API.Interfaces;
 using API.Models;
 using API.Repositories;
 
@@ -65,7 +66,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
 
     #region Employee
 
-    public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
+    public async Task<IEnumerable<EmployeeListSkillLevel>> GetAllEmployeesAsync()
     {
         var employees = await _employeeRepository.GetAllAsync();
 

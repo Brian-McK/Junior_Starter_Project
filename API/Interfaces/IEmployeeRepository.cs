@@ -1,10 +1,11 @@
-﻿using API.Models;
+﻿using API.DTO;
+using API.Models;
 
 namespace API.Interfaces;
 
 public interface IEmployeeRepository
 {
-    Task<IEnumerable<Employee>> GetAllAsync();
+    Task<IEnumerable<EmployeeListSkillLevel>> GetAllAsync();
     
     Task<Employee> GetByIdAsync(string id);
     

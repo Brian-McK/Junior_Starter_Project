@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace API.DTO;
 
-public class EmployeeCreateDto
+public class AddEmployeeRequestDto
 {
     [Required]
     public string? FirstName { get; set; }

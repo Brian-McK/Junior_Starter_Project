@@ -2,7 +2,7 @@
 
 namespace API.DTO;
 
-public class EmployeeListDto
+public class EmployeeListSkillLevel
 {
     public string? Id { get; set; }
     

@@ -1,6 +1,8 @@
 ﻿using API.Data;
+using API.DTO;
 using API.Interfaces;
 using API.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace API.Repositories;
@@ -14,9 +16,47 @@ public class EmployeeRepository: IEmployeeRepository
         _mongoDbContext = mongoDbContext;
     }
     
-    public async Task<IEnumerable<Employee>> GetAllAsync()
+    public async Task<IEnumerable<EmployeeListSkillLevel>> GetAllAsync()
     {
-        return await _mongoDbContext.Employees.Find(_ => true).ToListAsync();
+        // var pipeline = _mongoDbContext.Employees.Aggregate()
+        //     .Lookup(
+        //         foreignCollection: _mongoDbContext.SkillLevels,
+        //         localField: e => e.SkillLevelIds, // Property in the "employees" collection referencing skill levels
+        //         foreignField: sl => sl.Id, // ID property in the "skillLevels" collection
+        //         @as: (Employee e) => e.SkillLevelIds // Property in the "employees" collection to store the joined skill levels
+        //     );
+        //
+        // var result = await pipeline.ToListAsync();
+        //
+        // var employeeListSkillLevels = result.Select(e => new EmployeeListSkillLevel
+        // {
+        //     Id = e.Id,
+        //     FirstName = e.FirstName,
+        //     LastName = e.LastName,
+        //     Dob = e.Dob,
+        //     Email = e.Email,
+        //     SkillLevels = pipeline.As()
+        //     // Map other properties from Employee to EmployeeDto
+        // }).ToList();
+        //
+        // return result;
+        
+        
+        var employees = await _mongoDbContext.Employees.Find(_ => true).ToListAsync();
+        
+        var employeeListSkillLevels = employees.Select(e => new EmployeeListSkillLevel
+        {
+            Id = e.Id,
+            FirstName = e.FirstName,
+            LastName = e.LastName,
+            Dob = e.Dob,
+            Email = e.Email,
+            SkillLevels = _mongoDbContext.SkillLevels
+                .Find(skillLevel => e.SkillLevelIds.Equals(skillLevel.Id))
+                .ToList()
+        }).ToList();
+        
+        return employeeListSkillLevels;
     }
 
     public async Task<Employee> GetByIdAsync(string id)

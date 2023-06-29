@@ -42,7 +42,7 @@ public class EmployeesController: ControllerBase
     }
     
     [HttpPost, Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AddNewEmployee([FromBody] EmployeeCreateDto newEmpReq)
+    public async Task<IActionResult> AddNewEmployee([FromBody] AddEmployeeRequestDto newEmpReq)
     {
         if (newEmpReq == null)
         {
