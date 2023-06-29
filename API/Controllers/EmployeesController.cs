@@ -42,7 +42,7 @@ public class EmployeesController: ControllerBase
     }
     
     [HttpPost, Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AddNewEmployee([FromBody] EmployeeCreateDto? newEmpReq)
+    public async Task<IActionResult> AddNewEmployee([FromBody] EmployeeCreateDto newEmpReq)
     {
         if (newEmpReq == null)
         {
@@ -62,7 +62,7 @@ public class EmployeesController: ControllerBase
 
         foreach (var newEmployeeSkillLevelId in newEmpReq.SkillLevelIds)
         {
-            newEmployee.SkillLevelIds.Add(new ObjectId(newEmployeeSkillLevelId.ToString()));
+            newEmployee.SkillLevelIds.Add(new ObjectId(newEmployeeSkillLevelId));
         }
 
         await _employeeSkillLevelService.AddEmployeeAsync(newEmployee);
