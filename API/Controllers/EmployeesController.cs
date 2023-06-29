@@ -57,7 +57,7 @@ public class EmployeesController: ControllerBase
             Email = newEmpReq.Email,
             SkillLevelIds = new List<ObjectId>(),
             IsActive = newEmpReq.IsActive,
-            Age = newEmpReq.Dob!.Value.Year
+            Age = DateTime.Now.Year - newEmpReq.Dob!.Value.Year
         };
 
         foreach (var newEmployeeSkillLevelId in newEmpReq.SkillLevelIds)
@@ -90,7 +90,7 @@ public class EmployeesController: ControllerBase
         employee.Dob = updateEmployeeReq.Dob;
         employee.Email = updateEmployeeReq.Email;
         employee.IsActive = updateEmployeeReq.IsActive;
-        employee.Age = updateEmployeeReq.Age;
+        employee.Age = DateTime.Now.Year - updateEmployeeReq.Dob!.Value.Year;
 
         var isUpdatedEmployee = await _employeeSkillLevelService.UpdateEmployeeAsync(employee);
 

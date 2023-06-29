@@ -10,7 +10,7 @@ public class Employee
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; }
+    public string? Id { get; set; }
     
     [Required]
     public string? FirstName { get; set; }
@@ -23,10 +23,10 @@ public class Employee
     
     [Required]
     public string? Email { get; set; }
-    
-    public List<ObjectId> SkillLevelIds { get; set; }
-    
-    public bool IsActive { get; set; }
-    
+
+    public List<ObjectId>? SkillLevelIds { get; set; }
+
+    public bool IsActive { get; set; } = false;
+
     public int Age { get; set; }
 }
