@@ -66,7 +66,7 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
 
     #region Employee
 
-    public async Task<IEnumerable<EmployeeListSkillLevel>> GetAllEmployeesAsync()
+    public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
     {
         var employees = await _employeeRepository.GetAllAsync();
 

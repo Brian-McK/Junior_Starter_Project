@@ -5,7 +5,7 @@ namespace API.Interfaces;
 
 public interface IEmployeeRepository
 {
-    Task<IEnumerable<EmployeeListSkillLevel>> GetAllAsync();
+    Task<IEnumerable<Employee>> GetAllAsync();
     
     Task<Employee> GetByIdAsync(string id);
     

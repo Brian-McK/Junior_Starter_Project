@@ -16,47 +16,19 @@ public class EmployeeRepository: IEmployeeRepository
         _mongoDbContext = mongoDbContext;
     }
     
-    public async Task<IEnumerable<EmployeeListSkillLevel>> GetAllAsync()
+    public async Task<IEnumerable<Employee>> GetAllAsync()
     {
-        // var pipeline = _mongoDbContext.Employees.Aggregate()
-        //     .Lookup(
-        //         foreignCollection: _mongoDbContext.SkillLevels,
-        //         localField: e => e.SkillLevelIds, // Property in the "employees" collection referencing skill levels
-        //         foreignField: sl => sl.Id, // ID property in the "skillLevels" collection
-        //         @as: (Employee e) => e.SkillLevelIds // Property in the "employees" collection to store the joined skill levels
-        //     );
-        //
-        // var result = await pipeline.ToListAsync();
-        //
-        // var employeeListSkillLevels = result.Select(e => new EmployeeListSkillLevel
-        // {
-        //     Id = e.Id,
-        //     FirstName = e.FirstName,
-        //     LastName = e.LastName,
-        //     Dob = e.Dob,
-        //     Email = e.Email,
-        //     SkillLevels = pipeline.As()
-        //     // Map other properties from Employee to EmployeeDto
-        // }).ToList();
-        //
-        // return result;
+        var pipeline = _mongoDbContext.Employees.Aggregate()
+            .Lookup(
+                foreignCollection: _mongoDbContext.SkillLevels,
+                localField: e => e.SkillLevelIds, // Property in the "employees" collection referencing skill levels
+                foreignField: sl => sl.Id, // ID property in the "skillLevels" collection
+                @as: (Employee e) => e.SkillLevels // Property in the "employees" collection to store the joined skill levels
+            );
         
-        
-        var employees = await _mongoDbContext.Employees.Find(_ => true).ToListAsync();
-        
-        var employeeListSkillLevels = employees.Select(e => new EmployeeListSkillLevel
-        {
-            Id = e.Id,
-            FirstName = e.FirstName,
-            LastName = e.LastName,
-            Dob = e.Dob,
-            Email = e.Email,
-            SkillLevels = _mongoDbContext.SkillLevels
-                .Find(skillLevel => e.SkillLevelIds.Equals(skillLevel.Id))
-                .ToList()
-        }).ToList();
-        
-        return employeeListSkillLevels;
+        var result = await pipeline.ToListAsync();
+
+        return result;
     }
 
     public async Task<Employee> GetByIdAsync(string id)
