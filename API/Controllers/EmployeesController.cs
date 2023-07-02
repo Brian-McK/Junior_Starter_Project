@@ -89,12 +89,26 @@ public class EmployeesController: ControllerBase
         employee.LastName = updateEmployeeReq.LastName;
         employee.Dob = updateEmployeeReq.Dob;
         employee.Email = updateEmployeeReq.Email;
+        
+        // check if they have skillLevels first
+        if (employee.SkillLevelIds == null)
+        {
+            employee.SkillLevelIds = new List<ObjectId>();
+        }
+        
+        employee.SkillLevelIds.Clear();
+
+        foreach (var updatedEmployeeSkillLevel in updateEmployeeReq.SkillLevelIds)
+        {
+            employee.SkillLevelIds.Add(new ObjectId(updatedEmployeeSkillLevel));
+        }
+        
         employee.IsActive = updateEmployeeReq.IsActive;
         employee.Age = DateTime.Now.Year - updateEmployeeReq.Dob!.Value.Year;
 
         var isUpdatedEmployee = await _employeeSkillLevelService.UpdateEmployeeAsync(employee);
 
-        return isUpdatedEmployee ? Ok(employee) : BadRequest();
+        return isUpdatedEmployee ? Ok(employee) : BadRequest("Employee Not Updated");
     }
     
     [HttpDelete("{id}"), Authorize(Roles = "Admin")]
