@@ -62,9 +62,14 @@ public class AuthController: ControllerBase
 
         var user = await _employeeSkillLevelService.GetUserByUsernameAsync(loginDetails.Username);
 
+        if (user == null)
+        {
+            return NotFound("User Not Found");
+        }
+
         if (!(user.Username == loginDetails.Username && BCrypt.Net.BCrypt.Verify(loginDetails.Password, user.PasswordHash)))
         {
-            return Unauthorized();
+            return Unauthorized("Incorrect Username or Password");
         }
 
         var jwtToken = GenerateJwtToken(user.Username);
