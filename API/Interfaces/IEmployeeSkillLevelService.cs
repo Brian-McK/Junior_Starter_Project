@@ -27,6 +27,8 @@ public interface IEmployeeSkillLevelService
     
     Task<Employee> GetEmployeeByIdAsync(string id);
     
+    Task<Employee> GetEmployeeByEmailAsync(string email);
+    
     Task AddEmployeeAsync(Employee employee);
     
     Task<bool> UpdateEmployeeAsync(Employee employee);

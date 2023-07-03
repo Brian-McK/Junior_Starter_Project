@@ -48,6 +48,13 @@ public class EmployeesController: ControllerBase
         {
             return BadRequest();
         }
+        
+        var employee = await _employeeSkillLevelService.GetEmployeeByEmailAsync(newEmpReq.Email);
+
+        if (employee != null)
+        {
+            return Conflict("Email Already Exists");
+        }
 
         var newEmployee = new Employee
         {
@@ -121,6 +128,6 @@ public class EmployeesController: ControllerBase
         
         var requestResult = await _employeeSkillLevelService.DeleteEmployeeAsync(id);
 
-        return requestResult ? Ok() : NotFound();
+        return requestResult ? Ok("Deleted Successfully") : NotFound("Unsuccessful Delete");
     }
 }

@@ -79,6 +79,13 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
 
         return employee;
     }
+    
+    public async Task<Employee> GetEmployeeByEmailAsync(string email)
+    {
+        var employee = await _employeeRepository.GetByEmailAsync(email);
+
+        return employee;
+    }
 
     public async Task AddEmployeeAsync(Employee employee)
     {

@@ -35,6 +35,11 @@ public class EmployeeRepository: IEmployeeRepository
     {
         return await _mongoDbContext.Employees.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
     }
+    
+    public async Task<Employee> GetByEmailAsync(string email)
+    {
+        return await _mongoDbContext.Employees.Find(p => p.Email.Equals(email)).FirstOrDefaultAsync();
+    }
 
     public async Task AddAsync(Employee employee)
     {
