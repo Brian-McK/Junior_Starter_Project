@@ -25,7 +25,7 @@ public class EmployeesController: ControllerBase
     {
         var employees = await _employeeSkillLevelService.GetAllEmployeesAsync();
 
-        return Ok(employees);
+        return employees.Any() ? Ok(employees) : NoContent();
     }
     
     [HttpGet("{id}"), Authorize(Roles = "Admin")]
@@ -37,6 +37,11 @@ public class EmployeesController: ControllerBase
         }
         
         var employee = await _employeeSkillLevelService.GetEmployeeByIdAsync(id);
+
+        if (employee == null)
+        {
+            return NotFound("Employee Not Found!");
+        }
 
         return Ok(employee);
     }
@@ -58,8 +63,8 @@ public class EmployeesController: ControllerBase
 
         var newEmployee = new Employee
         {
-            FirstName = newEmpReq.FirstName,
-            LastName = newEmpReq.LastName,
+            FirstName = newEmpReq.FirstName!,
+            LastName = newEmpReq.LastName!,
             Dob = newEmpReq.Dob,
             Email = newEmpReq.Email,
             SkillLevelIds = new List<ObjectId>(),

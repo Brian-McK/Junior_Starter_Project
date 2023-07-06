@@ -10,13 +10,13 @@ public class Employee
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string? Id { get; set; }
+    public string Id { get; set; }
     
     [Required]
-    public string? FirstName { get; set; }
+    public string FirstName { get; set; }
     
     [Required]
-    public string? LastName { get; set; }
+    public string LastName { get; set; }
     
     [Required]
     public DateTime? Dob { get; set; }
