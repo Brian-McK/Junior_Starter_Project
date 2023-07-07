@@ -14,7 +14,7 @@ public class TestAuthController
 {
     private readonly Mock<IEmployeeSkillLevelService> _mockEmployeeSkillLevelService;
     private readonly IConfigurationRoot _configuration;
-    private readonly Mock<HttpResponse> _httpResponse;
+    private readonly Mock<IResponseCookies> _cookies;
 
     public TestAuthController()
     {
@@ -26,24 +26,7 @@ public class TestAuthController
             .AddEnvironmentVariables()
             .Build();
         
-        _httpResponse = new Mock<HttpResponse>();
-        
-        var cookies = new Mock<IResponseCookies>();
-        _httpResponse.SetupGet(r => r.Cookies).Returns(cookies.Object);
-        
-        var httpContextMock = new Mock<HttpContext>();
-        httpContextMock.SetupGet(c => c.Response).Returns(_httpResponse.Object);
-        
-        var controllerContext = new ControllerContext
-        {
-            HttpContext = httpContextMock.Object
-        };
-
-        // Create the AuthController instance with the mocked dependencies
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
-        {
-            ControllerContext = controllerContext
-        };
+        _cookies = new Mock<IResponseCookies>();
     }
 
     [Fact]
@@ -72,7 +55,17 @@ public class TestAuthController
     [Fact]
     public async Task RegisterUser_WhenUserDoesNotExist_ReturnsOkResult()
     {
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration);
+        var httpContextMock = new Mock<HttpContext>();
+        
+        httpContextMock.Setup(c => c.Response.Cookies).Returns(_cookies.Object);
+
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContextMock.Object
+            }
+        };
 
         var userThatDoesntExist = AuthMockData.GetUserDoesntExist();
         
