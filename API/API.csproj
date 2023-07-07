@@ -46,4 +46,10 @@
       <Folder Include="packages\xunit.extensibility.execution.2.1.0\lib\xamarinios\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
