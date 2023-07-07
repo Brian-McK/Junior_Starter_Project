@@ -93,7 +93,17 @@ public class TestAuthController
     [Fact]
     public async Task Authenticate_WithValidCredentials_ReturnsOkResult()
     {
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration);
+        var httpContextMock = new Mock<HttpContext>();
+        
+        httpContextMock.Setup(c => c.Response.Cookies).Returns(_cookies.Object);
+
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContextMock.Object
+            }
+        };
 
         var userThatExists = AuthMockData.GetUser();
         
