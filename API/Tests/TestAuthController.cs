@@ -205,37 +205,37 @@ public class TestAuthController
         Assert.Equal(StatusCodes.Status204NoContent, result.StatusCode);
     }
     
-    [Fact]
-    public void SetRefreshTokenToCookie_SetsCookieWithCorrectOptions()
-    {
-        var refreshToken = new RefreshToken
-        {
-            Token = "refreshToken",
-            Expires = DateTime.UtcNow.AddHours(1)
-        };
-
-        var responseMock = new Mock<HttpResponse>();
-        var cookiesMock = new Mock<IResponseCookies>();
-
-        responseMock.SetupGet(r => r.Cookies).Returns(cookiesMock.Object);
-
-        var httpContextMock = new Mock<HttpContext>();
-        httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
-
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
-        {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContextMock.Object
-            }
-        };
-        
-        controller.SetRefreshTokenToCookie(refreshToken);
-        
-        cookiesMock.Verify(c => c.Append("refreshToken", refreshToken.Token, It.Is<CookieOptions>(options =>
-            options.HttpOnly && options.Expires == refreshToken.Expires && options.SameSite == SameSiteMode.None && options.Secure
-        )), Times.Once);
-    }
+    // [Fact]
+    // public void SetRefreshTokenToCookie_SetsCookieWithCorrectOptions()
+    // {
+    //     var refreshToken = new RefreshToken
+    //     {
+    //         Token = "refreshToken",
+    //         Expires = DateTime.UtcNow.AddHours(1)
+    //     };
+    //
+    //     var responseMock = new Mock<HttpResponse>();
+    //     var cookiesMock = new Mock<IResponseCookies>();
+    //
+    //     responseMock.SetupGet(r => r.Cookies).Returns(cookiesMock.Object);
+    //
+    //     var httpContextMock = new Mock<HttpContext>();
+    //     httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
+    //
+    //     var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
+    //     {
+    //         ControllerContext = new ControllerContext
+    //         {
+    //             HttpContext = httpContextMock.Object
+    //         }
+    //     };
+    //     
+    //     controller.SetRefreshTokenToCookie(refreshToken);
+    //     
+    //     cookiesMock.Verify(c => c.Append("refreshToken", refreshToken.Token, It.Is<CookieOptions>(options =>
+    //         options.HttpOnly && options.Expires == refreshToken.Expires && options.SameSite == SameSiteMode.None && options.Secure
+    //     )), Times.Once);
+    // }
     
     // TODO
     // [Fact]
