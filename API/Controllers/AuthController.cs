@@ -66,10 +66,10 @@ public class AuthController: ControllerBase
         {
             return NotFound("User Not Found");
         }
-
-        if (!(user.Username == loginDetails.Username && BCrypt.Net.BCrypt.Verify(loginDetails.Password, user.PasswordHash)))
+        
+        if(loginDetails.Password != null && !IsValidCredentials(user, loginDetails.Password))
         {
-            return Unauthorized("Incorrect Username or Password");
+            return Unauthorized("Incorrect Password");
         }
 
         var jwtToken = GenerateJwtToken(user.Username);
@@ -228,5 +228,10 @@ public class AuthController: ControllerBase
         var tokenString = tokenHandler.WriteToken(token);
 
         return tokenString;
+    }
+    
+    private bool IsValidCredentials(User user, string password)
+    {
+        return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
     }
 }
