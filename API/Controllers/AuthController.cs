@@ -192,7 +192,7 @@ public class AuthController: ControllerBase
         return refreshToken;
     }
     
-    private void SetRefreshTokenToCookie(RefreshToken refreshToken)
+    public void SetRefreshTokenToCookie(RefreshToken refreshToken)
     {
         var cookieOptions = new CookieOptions
         {
@@ -230,7 +230,7 @@ public class AuthController: ControllerBase
         return tokenString;
     }
     
-    private bool IsValidCredentials(User user, string password)
+    public bool IsValidCredentials(User user, string password)
     {
         return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
     }
