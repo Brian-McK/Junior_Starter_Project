@@ -1,9 +1,7 @@
-﻿using System.Security.Claims;
-using API.Controllers;
+﻿using API.Controllers;
 using API.DTO;
 using API.Interfaces;
 using API.Models;
-using API.Services;
 using API.Tests.MockData;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -20,16 +18,16 @@ public class TestEmployeesController
         var mockEmployeeSkillLevelService = new Mock<IEmployeeSkillLevelService>();
         var controller = new EmployeesController(mockEmployeeSkillLevelService.Object);
 
-        var employees = EmployeesMockData.GetEmployees();
+        var expectedListOfEmployees = EmployeesMockData.GetEmployees();
             
         mockEmployeeSkillLevelService.Setup(service => service.GetAllEmployeesAsync())
-            .ReturnsAsync(employees);
+            .ReturnsAsync(expectedListOfEmployees);
         
         var result = await controller.GetAllEmployees();
         
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedEmployees = Assert.IsAssignableFrom<List<Employee>>(okResult.Value);
-        Assert.Equal(employees, returnedEmployees);
+        Assert.Equal(expectedListOfEmployees, returnedEmployees);
     }
     
     [Fact]
@@ -38,10 +36,10 @@ public class TestEmployeesController
         var mockEmployeeSkillLevelService = new Mock<IEmployeeSkillLevelService>();
         var controller = new EmployeesController(mockEmployeeSkillLevelService.Object);
 
-        var employees = new List<Employee>(); // Empty list
+        var expectedEmptyListOfEmployees = new List<Employee>();
 
         mockEmployeeSkillLevelService.Setup(service => service.GetAllEmployeesAsync())
-            .ReturnsAsync(employees);
+            .ReturnsAsync(expectedEmptyListOfEmployees);
         
         var result = await controller.GetAllEmployees();
         
@@ -57,16 +55,16 @@ public class TestEmployeesController
 
         var employeeId = EmployeesMockData.GetEmployees().FirstOrDefault()!.ToString();
 
-        var employee = EmployeesMockData.GetEmployees().FirstOrDefault();
+        var expectedEmployee = EmployeesMockData.GetEmployees().FirstOrDefault();
 
         mockEmployeeSkillLevelService.Setup(service => service.GetEmployeeByIdAsync(employeeId!))!
-            .ReturnsAsync(employee);
+            .ReturnsAsync(expectedEmployee);
         
         var result = await controller.GetEmployeeById(employeeId);
         
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedEmployee = Assert.IsType<Employee>(okResult.Value);
-        Assert.Equal(employee, returnedEmployee);
+        Assert.Equal(expectedEmployee, returnedEmployee);
     }
     
     [Fact]
@@ -101,7 +99,7 @@ public class TestEmployeesController
         var mockEmployeeSkillLevelService = new Mock<IEmployeeSkillLevelService>();
         var controller = new EmployeesController(mockEmployeeSkillLevelService.Object);
         
-        var result = await controller.AddNewEmployee(null);
+        var result = await controller.AddNewEmployee(null!);
         
         Assert.IsType<BadRequestResult>(result);
     }
@@ -124,10 +122,10 @@ public class TestEmployeesController
             SkillLevelIds = new List<string>()
         };
 
-        var existingEmployee = EmployeesMockData.GetEmployees().Find(emp => emp.Email == existingEmployeeEmail);
+        var expectedExistingEmployee = EmployeesMockData.GetEmployees().Find(emp => emp.Email == existingEmployeeEmail);
         
         mockEmployeeSkillLevelService.Setup(service => service.GetEmployeeByEmailAsync(existingEmployeeEmail!))!
-            .ReturnsAsync(existingEmployee);
+            .ReturnsAsync(expectedExistingEmployee);
         
         var result = await controller.AddNewEmployee(addEmployeeRequest);
         
@@ -231,7 +229,19 @@ public class TestEmployeesController
 
         mockEmployeeSkillLevelService.Setup(service => service.GetEmployeeByIdAsync(employeeId))!
             .ReturnsAsync(existingEmployee);
-        mockEmployeeSkillLevelService.Setup(service => service.UpdateEmployeeAsync(existingEmployee!))
+
+        var expectedEmployeeWhenUpdated = new Employee
+        {
+            Id = existingEmployee!.Id,
+            FirstName = updateEmployeeRequest.FirstName,
+            LastName = updateEmployeeRequest.LastName,
+            Dob = updateEmployeeRequest.Dob,
+            Email = updateEmployeeRequest.Email,
+            SkillLevelIds = updateEmployeeRequest.SkillLevelIds.Select(ObjectId.Parse).ToList(),
+            IsActive = updateEmployeeRequest.IsActive
+        };
+        
+        mockEmployeeSkillLevelService.Setup(service => service.UpdateEmployeeAsync(existingEmployee))
             .ReturnsAsync(true);
         
         var result = await controller.UpdateEmployee(employeeId, updateEmployeeRequest);
@@ -239,11 +249,12 @@ public class TestEmployeesController
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedEmployee = Assert.IsType<Employee>(okResult.Value);
         Assert.Equal(employeeId, returnedEmployee.Id);
-        Assert.Equal(updateEmployeeRequest.FirstName, returnedEmployee.FirstName);
-        Assert.Equal(updateEmployeeRequest.LastName, returnedEmployee.LastName);
-        Assert.Equal(updateEmployeeRequest.Dob, returnedEmployee.Dob);
-        Assert.Equal(updateEmployeeRequest.Email, returnedEmployee.Email);
-        Assert.Equal(updateEmployeeRequest.SkillLevelIds.Count, returnedEmployee.SkillLevelIds.Count);
+        Assert.Equal(expectedEmployeeWhenUpdated.FirstName, returnedEmployee.FirstName);
+        Assert.Equal(expectedEmployeeWhenUpdated.LastName, returnedEmployee.LastName);
+        Assert.Equal(expectedEmployeeWhenUpdated.Dob, returnedEmployee.Dob);
+        Assert.Equal(expectedEmployeeWhenUpdated.Email, returnedEmployee.Email);
+        Assert.Equal(expectedEmployeeWhenUpdated.SkillLevelIds.Count, returnedEmployee.SkillLevelIds.Count);
+        Assert.Equal(expectedEmployeeWhenUpdated.IsActive, returnedEmployee.IsActive);
     }
     
     [Fact]
@@ -260,7 +271,6 @@ public class TestEmployeesController
     [Fact]
     public async Task DeleteEmployee_ReturnsOkResult_WhenEmployeeDeletedSuccessfully()
     {
-        // Arrange
         var mockEmployeeSkillLevelService = new Mock<IEmployeeSkillLevelService>();
         var controller = new EmployeesController(mockEmployeeSkillLevelService.Object);
 

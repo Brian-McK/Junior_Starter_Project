@@ -18,6 +18,7 @@ namespace API.Tests;
 public class TestAuthController
 {
     private readonly Mock<IEmployeeSkillLevelService> _mockEmployeeSkillLevelService;
+    private readonly Mock<ITokenService> _mockTokenService;
     private readonly IConfigurationRoot _configuration;
     private readonly Mock<IResponseCookies> _cookies;
 
@@ -25,19 +26,21 @@ public class TestAuthController
     {
         _mockEmployeeSkillLevelService = new Mock<IEmployeeSkillLevelService>();
 
-        _configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(@"appsettings.json", false, false)
-            .AddEnvironmentVariables()
-            .Build();
+        _mockTokenService = new Mock<ITokenService>();
 
-        _cookies = new Mock<IResponseCookies>();
+        // _configuration = new ConfigurationBuilder()
+        //     .SetBasePath(Directory.GetCurrentDirectory())
+        //     .AddJsonFile(@"appsettings.json", false, false)
+        //     .AddEnvironmentVariables()
+        //     .Build();
+        //
+        // _cookies = new Mock<IResponseCookies>();
     }
 
     [Fact]
     public async Task RegisterUser_ReturnsBadRequest_WhenUserAlreadyExists()
     {
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, null);
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object);
 
         var userThatExists = AuthMockData.GetUser();
 
@@ -47,14 +50,14 @@ public class TestAuthController
             Password = userThatExists.PasswordHash
         };
 
-        var existingUser = AuthMockData.GetUsers().Find(u => u.Username == userThatExists.Username);
+        var existingUser = AuthMockData.GetUsers().Find(u => u.Username == registerUserDetails.Username);
 
         _mockEmployeeSkillLevelService.Setup(service => service.GetUserByUsernameAsync(registerUserDetails.Username!))!
             .ReturnsAsync(existingUser);
 
         var result = await controller.RegisterUser(registerUserDetails);
 
-        Assert.IsType<BadRequestResult>(result);
+        Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact]
@@ -64,7 +67,7 @@ public class TestAuthController
 
         httpContextMock.Setup(c => c.Response.Cookies).Returns(_cookies.Object);
 
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object)
         {
             ControllerContext = new ControllerContext
             {
@@ -102,7 +105,7 @@ public class TestAuthController
 
         httpContextMock.Setup(c => c.Response.Cookies).Returns(_cookies.Object);
 
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object)
         {
             ControllerContext = new ControllerContext
             {
@@ -183,7 +186,7 @@ public class TestAuthController
 
         var cookies = new Mock<IResponseCookies>();
 
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object)
         {
             ControllerContext = new ControllerContext
             {
