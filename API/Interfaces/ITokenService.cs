@@ -10,8 +10,9 @@ public interface ITokenService
 
     RefreshToken GenerateRefreshToken(string username, string role);
 
-    void AssignRefreshTokenToCookie(HttpResponse response, string cookieName, RefreshToken refreshToken,
-        TimeSpan expiration);
+    KeyValuePair<string, string>? GetTokenFromCookies(HttpRequest request, string tokenName);
+
+    void AssignRefreshTokenToCookie(HttpResponse response, string cookieName, RefreshToken refreshToken);
 
     void RemoveCookie(HttpResponse response, string cookieName);
 }

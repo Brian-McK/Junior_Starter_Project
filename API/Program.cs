@@ -18,6 +18,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<ISkillLevelRepository, SkillLevelRepository>();
 
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEmployeeSkillLevelService, EmployeeSkillLevelService>();
 
 builder.Services.AddControllers();

@@ -1,12 +1,13 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using API.Interfaces;
 using API.Models;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
-public class TokenService
+public class TokenService: ITokenService
 {
     private readonly IConfiguration _configuration;
     private readonly string? _jwtSecret;
@@ -19,7 +20,7 @@ public class TokenService
         _refreshTokenSecret = _configuration["AppSettings:Refresh_Token"];
     }
     
-    private string GenerateToken(string username, TimeSpan expiration, string? secret, string role)
+    public string GenerateToken(string username, TimeSpan expiration, string? secret, string role)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(secret);
@@ -58,8 +59,20 @@ public class TokenService
 
         return refreshToken;
     }
+
+    public KeyValuePair<string, string>? GetTokenFromCookies(HttpRequest request ,string tokenName)
+    {
+        var cookieRefreshToken = request.Cookies.ToDictionary(cookie => cookie.Key, cookie => cookie.Value).FirstOrDefault();
+
+        if (cookieRefreshToken.Key?.Equals(tokenName) == true && !string.IsNullOrEmpty(cookieRefreshToken.Value))
+        {
+            return cookieRefreshToken;
+        }
+
+        return null;
+    }
     
-    public void AssignRefreshTokenToCookie(HttpResponse response, string cookieName, RefreshToken refreshToken, TimeSpan expiration)
+    public void AssignRefreshTokenToCookie(HttpResponse response, string cookieName, RefreshToken refreshToken)
     {
         response.Cookies.Append(cookieName, refreshToken.Token, new CookieOptions
         {

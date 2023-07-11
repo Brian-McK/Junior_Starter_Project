@@ -19,24 +19,30 @@ public class AuthController: ControllerBase
 {
     private readonly IEmployeeSkillLevelService _employeeSkillLevelService;
     private readonly IConfiguration _configuration;
+    private readonly ITokenService _tokenService;
 
-    public AuthController(IEmployeeSkillLevelService employeeSkillLevelService, IConfiguration configuration)
+    public AuthController(IEmployeeSkillLevelService employeeSkillLevelService, IConfiguration configuration, ITokenService tokenService)
     {
         _employeeSkillLevelService = employeeSkillLevelService;
         _configuration = configuration;
+        _tokenService = tokenService;
     }
     
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> RegisterUser([FromBody] UserReqDto? registerUserDetails)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
 
         var findUser = await _employeeSkillLevelService.GetUserByUsernameAsync(registerUserDetails.Username);
         
         // check if user with username exists first
         if (findUser != null)
         {
-            return BadRequest();
+            return BadRequest("User already exists");
         }
         
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerUserDetails.Password);
@@ -55,9 +61,9 @@ public class AuthController: ControllerBase
     [HttpPost]
     public async Task<IActionResult> Authenticate([FromBody] UserReqDto? loginDetails)
     {
-        if (loginDetails == null)
+        if (!ModelState.IsValid)
         {
-            return BadRequest();
+            return BadRequest(ModelState);
         }
 
         var user = await _employeeSkillLevelService.GetUserByUsernameAsync(loginDetails.Username);
@@ -71,12 +77,14 @@ public class AuthController: ControllerBase
         {
             return Unauthorized("Incorrect Password");
         }
-
-        var jwtToken = GenerateJwtToken(user.Username);
-
-        var refreshToken = GenerateRefreshToken(user.Username);
         
-        SetRefreshTokenToCookie(refreshToken);
+        const string role = "Admin";
+
+        var jwtToken = _tokenService.GenerateJwtToken(user.Username, role);
+
+        var refreshToken = _tokenService.GenerateRefreshToken(user.Username, role);
+        
+        _tokenService.AssignRefreshTokenToCookie(Response, "refreshToken", refreshToken);
 
         var authResponse = new AuthResponse
         {
@@ -91,12 +99,7 @@ public class AuthController: ControllerBase
     [HttpPost("logout")]
     public ActionResult Logout()
     {
-        // Remove the authentication cookie
-        Response.Cookies.Delete("refreshToken", new CookieOptions()
-        {
-            SameSite = SameSiteMode.None,
-            Secure = true,
-        });
+        _tokenService.RemoveCookie(Response, "refreshToken");
 
         return NoContent();
     }
@@ -104,20 +107,18 @@ public class AuthController: ControllerBase
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] string username)
     {
-        if (username == null)
+        if (!ModelState.IsValid)
         {
             return BadRequest();
         }
-        
-        // get refresh token from http only cookie
-        var cookieRefreshToken = Request.Cookies.ToDictionary(cookie => cookie.Key, cookie => cookie.Value).FirstOrDefault();
 
-        if (!cookieRefreshToken.Key.Contains("refreshToken") && !cookieRefreshToken.Value.IsNullOrEmpty())
+        var cookieRefreshToken = _tokenService.GetTokenFromCookies(Request, "refreshToken");
+
+        if (cookieRefreshToken == null)
         {
-            // Access the cookie key-value pairs
-            return Unauthorized();
+            return Unauthorized("Token does not exist");
         }
-        
+
         // validate and decrypt token
         var tokenHandler = new JwtSecurityTokenHandler();
         
@@ -132,11 +133,12 @@ public class AuthController: ControllerBase
 
         var principal = new ClaimsPrincipal();
         var isValidDate = false;
+        const string role = "Admin";
 
         try
         {
             // Validate and decrypt the JWT token
-            principal = tokenHandler.ValidateToken(cookieRefreshToken.Value, validationParameters, out var validatedToken);
+            principal = tokenHandler.ValidateToken(cookieRefreshToken?.Value, validationParameters, out var validatedToken);
             isValidDate = validatedToken.ValidTo > DateTime.Now;
         }
         catch (SecurityTokenException ex)
@@ -144,7 +146,7 @@ public class AuthController: ControllerBase
             Console.WriteLine(ex);
         }
         
-        var isAdmin = principal.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        var isAdmin = principal.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == role);
             
         var isUser = principal.HasClaim(c => c.Type == JwtRegisteredClaimNames.Name && c.Value == username);
 
@@ -153,56 +155,11 @@ public class AuthController: ControllerBase
             return Forbid();
         }
         
-        var newJwtToken = GenerateJwtToken(username);
+        var newJwtToken = _tokenService.GenerateJwtToken(username, role);
 
         var jsonResponse = new { Username = username, JwtToken = newJwtToken };
 
         return Ok(jsonResponse);
-    }
-    
-    private RefreshToken GenerateRefreshToken(string username)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Refresh_Token").Value!));
-        
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Name, username!),
-            new Claim(ClaimTypes.Role, "Admin"),
-        };
-
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.Now.AddDays(1),
-            signingCredentials: credentials
-        );
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        
-        var refreshTokenStr = tokenHandler.WriteToken(token);
-
-        var refreshToken = new RefreshToken
-        {
-            CreatedDate = DateTime.Now,
-            Expires = token.ValidTo,
-            Token = refreshTokenStr
-        };
-
-        return refreshToken;
-    }
-    
-    private void SetRefreshTokenToCookie(RefreshToken refreshToken)
-    {
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true, // prevents client-side scripts accessing the data
-            Expires = refreshToken.Expires,
-            SameSite = SameSiteMode.None,
-            Secure = true
-        };
-        
-        Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
     }
 
     private string GenerateJwtToken(string username)
