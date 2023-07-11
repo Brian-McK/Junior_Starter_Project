@@ -92,85 +92,35 @@ public class TokenService: ITokenService
         });
     }
     
-    
-    
-    
-    
-    
-    
-    
-   // ___________________________________________________________________________________________________
-    
-    
-    
-    //
-    // public string GenerateJwtToken(string username)
-    // {
-    //     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:JWT_Token").Value!));
-    //
-    //     var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-    //
-    //     var claims = new[]
-    //     {
-    //         new Claim(JwtRegisteredClaimNames.Name, username!),
-    //         new Claim(ClaimTypes.Role, "Admin")
-    //     };
-    //
-    //     var token = new JwtSecurityToken(
-    //         claims: claims,
-    //         expires: DateTime.UtcNow.AddMinutes(20),
-    //         signingCredentials: credentials
-    //     );
-    //
-    //     var tokenHandler = new JwtSecurityTokenHandler();
-    //     
-    //     var tokenString = tokenHandler.WriteToken(token);
-    //
-    //     return tokenString;
-    // }
-    //
-    // public RefreshToken GenerateRefreshToken(string username)
-    // {
-    //     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Refresh_Token").Value!));
-    //     
-    //     var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-    //     
-    //     var claims = new[]
-    //     {
-    //         new Claim(JwtRegisteredClaimNames.Name, username!),
-    //         new Claim(ClaimTypes.Role, "Admin"),
-    //     };
-    //
-    //     var token = new JwtSecurityToken(
-    //         claims: claims,
-    //         expires: DateTime.Now.AddDays(1),
-    //         signingCredentials: credentials
-    //     );
-    //
-    //     var tokenHandler = new JwtSecurityTokenHandler();
-    //     
-    //     var refreshTokenStr = tokenHandler.WriteToken(token);
-    //
-    //     var refreshToken = new RefreshToken
-    //     {
-    //         CreatedDate = DateTime.Now,
-    //         Expires = token.ValidTo,
-    //         Token = refreshTokenStr
-    //     };
-    //
-    //     return refreshToken;
-    // }
-    //
-    // private void SetRefreshTokenToCookie(RefreshToken refreshToken)
-    // {
-    //     var cookieOptions = new CookieOptions
-    //     {
-    //         HttpOnly = true, // prevents client-side scripts accessing the data
-    //         Expires = refreshToken.Expires,
-    //         SameSite = SameSiteMode.None,
-    //         Secure = true
-    //     };
-    //     
-    //     Response.Cookies.Append("refreshToken", refreshToken.Token, cookieOptions);
-    // }
+    public bool IsValidToken(KeyValuePair<string, string>? token, string username, string role)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_refreshTokenSecret!)),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero
+        };
+
+        var principal = new ClaimsPrincipal();
+        var isValidDate = false;
+
+        try
+        {
+            principal = tokenHandler.ValidateToken(token.Value.Value, validationParameters, out var validatedToken);
+            isValidDate = validatedToken.ValidTo > DateTime.Now;
+        }
+        catch (SecurityTokenException ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        var isAdmin = principal.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == role);
+        var isUser = principal.HasClaim(c => c.Type == JwtRegisteredClaimNames.Name && c.Value == username);
+
+        return isAdmin && isUser && isValidDate;
+    }
 }

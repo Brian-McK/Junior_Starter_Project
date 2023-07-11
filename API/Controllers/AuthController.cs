@@ -1,14 +1,8 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Runtime.InteropServices.JavaScript;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using API.DTO;
+﻿using API.DTO;
 using API.Interfaces;
 using API.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+
 
 namespace API.Controllers;
 
@@ -18,13 +12,11 @@ namespace API.Controllers;
 public class AuthController: ControllerBase
 {
     private readonly IEmployeeSkillLevelService _employeeSkillLevelService;
-    private readonly IConfiguration _configuration;
     private readonly ITokenService _tokenService;
 
-    public AuthController(IEmployeeSkillLevelService employeeSkillLevelService, IConfiguration configuration, ITokenService tokenService)
+    public AuthController(IEmployeeSkillLevelService employeeSkillLevelService, ITokenService tokenService)
     {
         _employeeSkillLevelService = employeeSkillLevelService;
-        _configuration = configuration;
         _tokenService = tokenService;
     }
     
@@ -73,7 +65,7 @@ public class AuthController: ControllerBase
             return NotFound("User Not Found");
         }
         
-        if(loginDetails.Password != null && !IsValidCredentials(user, loginDetails.Password))
+        if(loginDetails.Password != null && !BCrypt.Net.BCrypt.Verify(loginDetails.Password, user.PasswordHash))
         {
             return Unauthorized("Incorrect Password");
         }
@@ -118,39 +110,10 @@ public class AuthController: ControllerBase
         {
             return Unauthorized("Token does not exist");
         }
-
-        // validate and decrypt token
-        var tokenHandler = new JwtSecurityTokenHandler();
         
-        var validationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Refresh_Token").Value!)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ClockSkew= TimeSpan.FromMinutes(0)
-        };
-
-        var principal = new ClaimsPrincipal();
-        var isValidDate = false;
         const string role = "Admin";
 
-        try
-        {
-            // Validate and decrypt the JWT token
-            principal = tokenHandler.ValidateToken(cookieRefreshToken?.Value, validationParameters, out var validatedToken);
-            isValidDate = validatedToken.ValidTo > DateTime.Now;
-        }
-        catch (SecurityTokenException ex)
-        {
-            Console.WriteLine(ex);
-        }
-        
-        var isAdmin = principal.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == role);
-            
-        var isUser = principal.HasClaim(c => c.Type == JwtRegisteredClaimNames.Name && c.Value == username);
-
-        if (!(isAdmin && isUser && isValidDate))
+        if (!_tokenService.IsValidToken(cookieRefreshToken, username, role))
         {
             return Forbid();
         }
@@ -160,35 +123,5 @@ public class AuthController: ControllerBase
         var jsonResponse = new { Username = username, JwtToken = newJwtToken };
 
         return Ok(jsonResponse);
-    }
-
-    private string GenerateJwtToken(string username)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:JWT_Token").Value!));
-
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Name, username!),
-            new Claim(ClaimTypes.Role, "Admin")
-        };
-
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(20),
-            signingCredentials: credentials
-        );
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        
-        var tokenString = tokenHandler.WriteToken(token);
-
-        return tokenString;
-    }
-    
-    private bool IsValidCredentials(User user, string password)
-    {
-        return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
     }
 }
