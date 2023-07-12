@@ -1,17 +1,11 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Security.Claims;
-using System.Text;
-using API.Controllers;
+﻿using API.Controllers;
 using API.DTO;
 using API.Interfaces;
 using API.Models;
 using API.Tests.MockData;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Moq;
 using Xunit;
-using IConfiguration = Castle.Core.Configuration.IConfiguration;
 
 namespace API.Tests;
 
@@ -28,13 +22,13 @@ public class TestAuthController
 
         _mockTokenService = new Mock<ITokenService>();
 
-        // _configuration = new ConfigurationBuilder()
-        //     .SetBasePath(Directory.GetCurrentDirectory())
-        //     .AddJsonFile(@"appsettings.json", false, false)
-        //     .AddEnvironmentVariables()
-        //     .Build();
-        //
-        // _cookies = new Mock<IResponseCookies>();
+        _configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile(@"appsettings.json", false, false)
+            .AddEnvironmentVariables()
+            .Build();
+        
+        _cookies = new Mock<IResponseCookies>();
     }
 
     [Fact]
@@ -42,18 +36,16 @@ public class TestAuthController
     {
         var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object);
 
-        var userThatExists = AuthMockData.GetUser();
+        var expectedExistingUser = AuthMockData.GetUser();
 
         var registerUserDetails = new UserReqDto
         {
-            Username = userThatExists.Username,
-            Password = userThatExists.PasswordHash
+            Username = expectedExistingUser.Username,
+            Password = expectedExistingUser.PasswordHash
         };
 
-        var existingUser = AuthMockData.GetUsers().Find(u => u.Username == registerUserDetails.Username);
-
         _mockEmployeeSkillLevelService.Setup(service => service.GetUserByUsernameAsync(registerUserDetails.Username!))!
-            .ReturnsAsync(existingUser);
+            .ReturnsAsync(expectedExistingUser);
 
         var result = await controller.RegisterUser(registerUserDetails);
 
@@ -63,18 +55,8 @@ public class TestAuthController
     [Fact]
     public async Task RegisterUser_WhenUserDoesNotExist_ReturnsOkResult()
     {
-        var httpContextMock = new Mock<HttpContext>();
-
-        httpContextMock.Setup(c => c.Response.Cookies).Returns(_cookies.Object);
-
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object)
-        {
-            ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContextMock.Object
-            }
-        };
-
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object);
+        
         var userThatDoesntExist = AuthMockData.GetUserDoesntExist();
 
         var registerUserDetails = new UserReqDto
@@ -83,10 +65,10 @@ public class TestAuthController
             Password = userThatDoesntExist.PasswordHash
         };
 
-        var existingUser = AuthMockData.GetUsers().Find(u => u.Username == registerUserDetails.Username);
+        var expectedNonExistingUser = AuthMockData.GetUsers().Find(u => u.Username == registerUserDetails.Username);
 
         _mockEmployeeSkillLevelService.Setup(s => s.GetUserByUsernameAsync(registerUserDetails.Username!))!
-            .ReturnsAsync(existingUser);
+            .ReturnsAsync(expectedNonExistingUser);
 
         var result = await controller.RegisterUser(registerUserDetails);
 
@@ -124,6 +106,23 @@ public class TestAuthController
         _mockEmployeeSkillLevelService.Setup(s => s.GetUserByUsernameAsync(loginDetails.Username!))
             .ReturnsAsync(userThatExists);
 
+        const string jwt = "sfdsdsdsdsddssds";
+        
+        _mockTokenService.Setup(s => s.GenerateJwtToken(loginDetails.Username!,"Admin"))
+            .Returns(jwt);
+
+        var refresh = new RefreshToken
+        {
+            Token = "sdssdssfsfsfsffs",
+            CreatedDate = DateTime.Now.Date,
+            Expires = DateTime.Now.AddDays(1)
+        };
+        
+        _mockTokenService.Setup(s => s.GenerateRefreshToken(loginDetails.Username!,"Admin"))
+            .Returns(refresh);
+
+        _mockTokenService.Setup(t => t.AssignRefreshTokenToCookie(httpContextMock.Object.Response, "refreshToken", refresh));
+        
         var result = await controller.Authenticate(loginDetails);
 
         Assert.IsType<OkObjectResult>(result);
@@ -138,21 +137,17 @@ public class TestAuthController
     [Fact]
     public async Task Authenticate_WithNullLoginDetails_ReturnsBadRequest()
     {
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, null);
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object);
 
         var result = await controller.Authenticate(null);
 
-        Assert.IsType<BadRequestResult>(result);
+        Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact]
     public async Task Authenticate_WithNonExistentUser_ReturnsNotFound()
     {
-        var httpContextMock = new Mock<HttpContext>();
-
-        httpContextMock.Setup(c => c.Response.Cookies).Returns(_cookies.Object);
-
-        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, null);
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object);
 
         var user = AuthMockData.GetUserDoesntExist();
 
@@ -195,62 +190,117 @@ public class TestAuthController
         };
 
         response.SetupGet(r => r.Cookies).Returns(cookies.Object);
+        
+        _mockTokenService.Setup(t => t.AssignRefreshTokenToCookie(httpContextMock.Object.Response, "refreshToken", It.IsAny<RefreshToken>()));
 
-        cookies.Setup(c => c.Append("refreshToken", It.IsAny<string>(), It.IsAny<CookieOptions>()));
-
-        cookies.Setup(c => c.Delete("refreshToken", It.IsAny<CookieOptions>()));
+        _mockTokenService.Setup(t => t.RemoveCookie(httpContextMock.Object.Response, "refreshToken"));
 
         var result = controller.Logout() as NoContentResult;
-
-        cookies.Verify(c => c.Delete("refreshToken", It.IsAny<CookieOptions>()));
+        
+        _mockTokenService.Verify(c => c.RemoveCookie(httpContextMock.Object.Response, "refreshToken"));
 
         Assert.NotNull(result);
         Assert.Equal(StatusCodes.Status204NoContent, result.StatusCode);
     }
     
-    // [Fact]
-    // public void SetRefreshTokenToCookie_SetsCookieWithCorrectOptions()
-    // {
-    //     var refreshToken = new RefreshToken
-    //     {
-    //         Token = "refreshToken",
-    //         Expires = DateTime.UtcNow.AddHours(1)
-    //     };
-    //
-    //     var responseMock = new Mock<HttpResponse>();
-    //     var cookiesMock = new Mock<IResponseCookies>();
-    //
-    //     responseMock.SetupGet(r => r.Cookies).Returns(cookiesMock.Object);
-    //
-    //     var httpContextMock = new Mock<HttpContext>();
-    //     httpContextMock.SetupGet(c => c.Response).Returns(responseMock.Object);
-    //
-    //     var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _configuration)
-    //     {
-    //         ControllerContext = new ControllerContext
-    //         {
-    //             HttpContext = httpContextMock.Object
-    //         }
-    //     };
-    //     
-    //     controller.SetRefreshTokenToCookie(refreshToken);
-    //     
-    //     cookiesMock.Verify(c => c.Append("refreshToken", refreshToken.Token, It.Is<CookieOptions>(options =>
-    //         options.HttpOnly && options.Expires == refreshToken.Expires && options.SameSite == SameSiteMode.None && options.Secure
-    //     )), Times.Once);
-    // }
-    
-    // TODO
-    // [Fact]
-    // public void RefreshToken_WithoutRefreshTokenCookie_ReturnsUnauthorized()
-    // {
-    //   
-    // }
+    [Fact]
+    public async Task RefreshToken_WithValidData_ReturnsOkResult()
+    {
+        var httpContextMock = new Mock<HttpContext>();
 
-    // TODO
-    // [Fact]
-    // public void RefreshToken_WithValidToken_ReturnsNewJwtToken()
-    // {
-    //   
-    // }
+        var response = new Mock<HttpResponse>();
+
+        httpContextMock.SetupGet(c => c.Response).Returns(response.Object);
+
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContextMock.Object
+            }
+        };
+
+        var username = AuthMockData.GetUser().Username;
+        const string validRefreshToken = "validRefreshToken";
+        const string newJwtToken = "newJwtToken";
+
+        var refreshToken = new KeyValuePair<string, string>("refreshToken", validRefreshToken);
+
+        _mockTokenService.Setup(t => t.GetTokenFromCookies(controller.Request, "refreshToken"))
+            .Returns(refreshToken);
+        
+        _mockTokenService.Setup(t => t.IsValidToken(refreshToken, username!, "Admin"))
+            .Returns(true);
+        
+        _mockTokenService.Setup(t => t.GenerateJwtToken(username!, "Admin"))
+            .Returns(newJwtToken);
+        
+        var result = await controller.RefreshToken(username!);
+        
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        dynamic jsonResponse = okResult.Value!;
+        Assert.Equal(username, jsonResponse.Username);
+        Assert.Equal(newJwtToken, jsonResponse.JwtToken);
+    }
+    
+    [Fact]
+    public async Task RefreshToken_WithInvalidData_ReturnsUnauthorizedResult()
+    {
+        var httpContextMock = new Mock<HttpContext>();
+
+        var response = new Mock<HttpResponse>();
+
+        httpContextMock.SetupGet(c => c.Response).Returns(response.Object);
+
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContextMock.Object
+            }
+        };
+        
+        var username = AuthMockData.GetUser().Username;
+
+        _mockTokenService.Setup(t => t.GetTokenFromCookies(controller.Request, "refreshToken"))
+            .Returns((KeyValuePair<string, string>?)null);
+        
+        var result = await controller.RefreshToken(username!);
+
+        Assert.IsType<UnauthorizedObjectResult>(result);
+    }
+    
+    [Fact]
+    public async Task RefreshToken_WithInvalidToken_ReturnsForbidResult()
+    {
+        var httpContextMock = new Mock<HttpContext>();
+
+        var response = new Mock<HttpResponse>();
+
+        httpContextMock.SetupGet(c => c.Response).Returns(response.Object);
+
+        var controller = new AuthController(_mockEmployeeSkillLevelService.Object, _mockTokenService.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContextMock.Object
+            }
+        };
+        
+        var username = AuthMockData.GetUser().Username;
+        
+        const string refreshTokenStr = "validRefreshToken";
+        
+        var validRefreshToken = new KeyValuePair<string, string>("refreshToken", refreshTokenStr);
+
+        _mockTokenService.Setup(t => t.GetTokenFromCookies(controller.Request, "refreshToken"))
+            .Returns(validRefreshToken);
+        
+        _mockTokenService.Setup(t => t.IsValidToken(validRefreshToken, username!, "Admin"))
+            .Returns(false);
+        
+        var result = await controller.RefreshToken(username!);
+        
+        Assert.IsType<ForbidResult>(result);
+    }
 }

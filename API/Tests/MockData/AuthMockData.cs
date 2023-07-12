@@ -64,7 +64,7 @@ public class AuthMockData
             }
         };
     }
-    
+
     private static string? GeneratePasswordHash(string password)
     {
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);

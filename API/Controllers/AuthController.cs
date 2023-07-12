@@ -53,7 +53,7 @@ public class AuthController: ControllerBase
     [HttpPost]
     public async Task<IActionResult> Authenticate([FromBody] UserReqDto? loginDetails)
     {
-        if (!ModelState.IsValid)
+        if (!ModelState.IsValid || loginDetails == null)
         {
             return BadRequest(ModelState);
         }
