@@ -52,4 +52,12 @@ public interface IEmployeeSkillLevelService
     Task<bool> DeleteSkillLevelAsync(string id);
    
     #endregion
+    
+    #region RefreshTokens
+    Task AddRefreshTokenAsync(RefreshTokenStore refreshToken);
+    Task<bool> UpdateRefreshTokenAsync(RefreshTokenStore refreshToken);
+    Task DeleteRefreshTokenAsync(string id);
+    Task CheckRefreshTokenExistsAsync(string id);
+    
+    #endregion
 }

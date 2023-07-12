@@ -20,9 +20,13 @@ public class MongoDbContext: IMongoDbContext
         
         SkillLevels = db.GetCollection<SkillLevel>(
             configuration.GetValue<string>("EmployeeSkillsDatabaseSettings:SkillLevelCollectionName"));
+        
+        RefreshTokens = db.GetCollection<RefreshTokenStore>(
+            configuration.GetValue<string>("EmployeeSkillsDatabaseSettings:RefreshTokenStoreCollectionName"));
     }
     
     public IMongoCollection<User> Users { get; }
     public IMongoCollection<Employee> Employees { get; }
     public IMongoCollection<SkillLevel> SkillLevels { get; }
+    public IMongoCollection<RefreshTokenStore> RefreshTokens { get; }
 }

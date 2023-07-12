@@ -8,4 +8,5 @@ public interface IMongoDbContext
     IMongoCollection<User> Users { get; }
     IMongoCollection<Employee> Employees { get; }
     IMongoCollection<SkillLevel> SkillLevels { get; }
+    IMongoCollection<RefreshTokenStore> RefreshTokens { get; }
 }

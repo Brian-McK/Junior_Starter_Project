@@ -12,12 +12,14 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
     private readonly IUserRepository _userRepository;
     private readonly IEmployeeRepository _employeeRepository;
     private readonly ISkillLevelRepository _skillLevelRepository;
+    private readonly IRefreshTokensRepository _refreshTokensRepository;
     
-    public EmployeeSkillLevelService(IUserRepository userRepository, IEmployeeRepository employeeRepository, ISkillLevelRepository skillLevelRepository)
+    public EmployeeSkillLevelService(IUserRepository userRepository, IEmployeeRepository employeeRepository, ISkillLevelRepository skillLevelRepository, IRefreshTokensRepository refreshTokensRepository)
     {
         _userRepository = userRepository;
         _employeeRepository = employeeRepository;
         _skillLevelRepository = skillLevelRepository;
+        _refreshTokensRepository = refreshTokensRepository;
     }
 
     #region User
@@ -150,6 +152,32 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
         return isDeletedSkillLevel;
     }
 
+    #endregion
+    
+    #region RefreshTokens
+    
+    public async Task AddRefreshTokenAsync(RefreshTokenStore refreshToken)
+    {
+        await _refreshTokensRepository.AddAsync(refreshToken);
+    }
+    
+    public async Task<bool> UpdateRefreshTokenAsync(RefreshTokenStore refreshToken)
+    {
+        var isUpdatedRefreshToken = await _refreshTokensRepository.UpdateAsync(refreshToken);
+
+        return isUpdatedRefreshToken;
+    }
+    
+    public async Task DeleteRefreshTokenAsync(string id)
+    {
+        await _refreshTokensRepository.DeleteAsync(id);
+    }
+    
+    public async Task CheckRefreshTokenExistsAsync(string id)
+    {
+        await _refreshTokensRepository.RefreshTokenExists(id);
+    }
+    
     #endregion
     
 }

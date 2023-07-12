@@ -11,4 +11,6 @@ public class EmployeeSkillsDatabaseSettings
     public string UserCollectionName { get; set; } = null!;
     
     public string SkillLevelCollectionName { get; set; } = null!;
+    
+    public string RefreshTokenStoreCollectionName { get; set; } = null!;
 }

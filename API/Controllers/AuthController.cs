@@ -78,6 +78,16 @@ public class AuthController: ControllerBase
         
         _tokenService.AssignRefreshTokenToCookie(Response, "refreshToken", refreshToken);
 
+        var refreshTokenStore = new RefreshTokenStore
+        {
+            UserId = user.Id,
+            RefreshToken = refreshToken.Token,
+            Created = refreshToken.CreatedDate,
+            IsValid = true
+        };
+
+        await _employeeSkillLevelService.AddRefreshTokenAsync(refreshTokenStore);
+
         var authResponse = new AuthResponse
         {
             Username = user.Username,
@@ -117,6 +127,12 @@ public class AuthController: ControllerBase
         {
             return Forbid();
         }
+        
+        // // Check if the refresh token has already been used
+        // if (_tokenService.IsRefreshTokenUsed(cookieRefreshToken))
+        // {
+        //     return Unauthorized("Token has already been used");
+        // }
         
         var newJwtToken = _tokenService.GenerateJwtToken(username, role);
 
