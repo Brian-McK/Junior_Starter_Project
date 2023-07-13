@@ -172,12 +172,14 @@ public class EmployeeSkillLevelService: IEmployeeSkillLevelService
     {
         await _refreshTokensRepository.DeleteAsync(id);
     }
-    
-    public async Task CheckRefreshTokenExistsAsync(string id)
+
+    public async Task<RefreshTokenStore?> GetSavedRefreshToken(string userId, string refreshToken)
     {
-        await _refreshTokensRepository.RefreshTokenExists(id);
+        var refreshTokenResult = await _refreshTokensRepository.GetRefreshToken(userId, refreshToken);
+
+        return refreshTokenResult;
     }
-    
+
     #endregion
     
 }

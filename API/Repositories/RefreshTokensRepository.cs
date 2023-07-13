@@ -31,13 +31,14 @@ public class RefreshTokensRepository: IRefreshTokensRepository
 
         await _mongoDbContext.RefreshTokens.DeleteOneAsync(filter);
     }
-    
-    public async Task<bool> RefreshTokenExists(string id)
+
+    public async Task<RefreshTokenStore?> GetRefreshToken(string userId, string refreshToken)
     {
-        var filter = new FilterDefinitionBuilder<RefreshTokenStore>().Eq(r => r.Id, id);
+        var filter = Builders<RefreshTokenStore>.Filter.Eq(t => t.UserId, userId) &
+                     Builders<RefreshTokenStore>.Filter.Eq(t => t.RefreshToken, refreshToken);
+        
+        var result = await _mongoDbContext.RefreshTokens.Find(filter).FirstOrDefaultAsync();
 
-        var count = await _mongoDbContext.RefreshTokens.CountDocumentsAsync(filter);
-
-        return count > 0;
+        return result;
     }
 }

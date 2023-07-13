@@ -56,8 +56,8 @@ public interface IEmployeeSkillLevelService
     #region RefreshTokens
     Task AddRefreshTokenAsync(RefreshTokenStore refreshToken);
     Task<bool> UpdateRefreshTokenAsync(RefreshTokenStore refreshToken);
+    Task<RefreshTokenStore?> GetSavedRefreshToken(string userId, string refreshToken);
     Task DeleteRefreshTokenAsync(string id);
-    Task CheckRefreshTokenExistsAsync(string id);
-    
+
     #endregion
 }

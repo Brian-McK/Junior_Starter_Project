@@ -43,7 +43,7 @@ public class TokenService: ITokenService
     
     public string GenerateJwtToken(string username, string role)
     {
-        return GenerateToken(username, TimeSpan.FromMinutes(20), _jwtSecret, role);
+        return GenerateToken(username, TimeSpan.FromMinutes(15), _jwtSecret, role);
     }
     
     public RefreshToken GenerateRefreshToken(string username, string role)

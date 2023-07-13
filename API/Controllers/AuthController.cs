@@ -83,7 +83,6 @@ public class AuthController: ControllerBase
             UserId = user.Id,
             RefreshToken = refreshToken.Token,
             Created = refreshToken.CreatedDate,
-            IsValid = true
         };
 
         await _employeeSkillLevelService.AddRefreshTokenAsync(refreshTokenStore);
@@ -120,20 +119,30 @@ public class AuthController: ControllerBase
         {
             return Unauthorized("Token does not exist");
         }
+
+        var user = await _employeeSkillLevelService.GetUserByUsernameAsync(username);
+
+        if (user == null)
+        {
+            return Unauthorized("Unauthorized");
+        }
+
+        // check not equal
+        var savedRefreshToken = await _employeeSkillLevelService.GetSavedRefreshToken(user.Id, cookieRefreshToken.Value.Value);
+
+        if (savedRefreshToken?.RefreshToken != cookieRefreshToken.Value.Value)
+        {
+            return Unauthorized("Invalid Token, You have been logged out");
+        }
         
+        // extract role from claims?
         const string role = "Admin";
 
         if (!_tokenService.IsValidToken(cookieRefreshToken, username, role))
         {
             return Forbid();
         }
-        
-        // // Check if the refresh token has already been used
-        // if (_tokenService.IsRefreshTokenUsed(cookieRefreshToken))
-        // {
-        //     return Unauthorized("Token has already been used");
-        // }
-        
+
         var newJwtToken = _tokenService.GenerateJwtToken(username, role);
 
         var jsonResponse = new { Username = username, JwtToken = newJwtToken };
