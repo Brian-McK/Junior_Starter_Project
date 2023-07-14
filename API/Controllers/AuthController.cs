@@ -110,7 +110,7 @@ public class AuthController: ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest();
+            return BadRequest("Bad Request");
         }
 
         var cookieRefreshToken = _tokenService.GetTokenFromCookies(Request, "refreshToken");
