@@ -62,12 +62,12 @@ public class AuthController: ControllerBase
 
         if (user == null)
         {
-            return NotFound("User Not Found");
+            return NotFound("Incorrect Username or password");
         }
         
         if(loginDetails.Password != null && !BCrypt.Net.BCrypt.Verify(loginDetails.Password, user.PasswordHash))
         {
-            return Unauthorized("Incorrect Password");
+            return Unauthorized("Incorrect Username or Password");
         }
         
         const string role = "Admin";
