@@ -130,7 +130,7 @@ public class TestEmployeesController
         var result = await controller.AddNewEmployee(addEmployeeRequest);
         
         var conflictResult = Assert.IsType<ConflictObjectResult>(result);
-        Assert.Equal("Email Already Exists", conflictResult.Value);
+        Assert.Equal("User Already Exists", conflictResult.Value);
     }
     
     [Fact]
@@ -204,7 +204,7 @@ public class TestEmployeesController
         
         var result = await controller.UpdateEmployee(id, updateEmployeeRequest);
         
-        Assert.IsType<BadRequestResult>(result);
+        Assert.IsType<BadRequestObjectResult>(result);
     }
 
     [Fact]
@@ -240,6 +240,9 @@ public class TestEmployeesController
             SkillLevelIds = updateEmployeeRequest.SkillLevelIds.Select(ObjectId.Parse).ToList(),
             IsActive = updateEmployeeRequest.IsActive
         };
+        
+        mockEmployeeSkillLevelService.Setup(mock => mock.GetSkillLevelByIdAsync(It.IsAny<string>()))
+            .ReturnsAsync(new SkillLevel());
         
         mockEmployeeSkillLevelService.Setup(service => service.UpdateEmployeeAsync(existingEmployee))
             .ReturnsAsync(true);
