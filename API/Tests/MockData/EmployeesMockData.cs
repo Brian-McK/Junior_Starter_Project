@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using API.DTO;
 using API.Models;
 using API.Tests.MockData;
 using MongoDB.Bson;
@@ -44,6 +45,19 @@ public class EmployeesMockData
                 SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => new ObjectId(item.Id)).ToList().GetRange(0,1),
                 SkillLevels = SkillLevelsMockData.GetSkillLevels().GetRange(0, 1)
             },
+        };
+    }
+
+    public static AddEmployeeRequestDto GetAddEmployeeRequest()
+    {
+        return new AddEmployeeRequestDto
+        {
+            FirstName = "Mary",
+            LastName = "McEntee",
+            Dob = DateTime.Now.AddYears(-19),
+            Email = "mary@hello.com",
+            SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => new ObjectId(item.Id).ToString()).ToList(),
+            IsActive = true
         };
     }
 }
