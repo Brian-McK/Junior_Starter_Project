@@ -54,11 +54,16 @@ public class EmployeesController: ControllerBase
             return BadRequest();
         }
         
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+        
         var employee = await _employeeSkillLevelService.GetEmployeeByEmailAsync(newEmpReq.Email);
 
         if (employee != null)
         {
-            return Conflict("Email Already Exists");
+            return Conflict("User Already Exists");
         }
 
         var newEmployee = new Employee
@@ -74,7 +79,14 @@ public class EmployeesController: ControllerBase
 
         foreach (var newEmployeeSkillLevelId in newEmpReq.SkillLevelIds)
         {
-            newEmployee.SkillLevelIds.Add(new ObjectId(newEmployeeSkillLevelId));
+          var skillExists = await _employeeSkillLevelService.GetSkillLevelByIdAsync(newEmployeeSkillLevelId);
+
+          if (skillExists == null)
+          {
+              return BadRequest("Invalid skill entry, the skill doesnt exist");
+          }
+          
+          newEmployee.SkillLevelIds.Add(new ObjectId(newEmployeeSkillLevelId));
         }
 
         await _employeeSkillLevelService.AddEmployeeAsync(newEmployee);
@@ -85,39 +97,43 @@ public class EmployeesController: ControllerBase
     [HttpPut("{id}"), Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateEmployee(string? id, [FromBody] EmployeeEditDto? updateEmployeeReq)
     {
-        if (updateEmployeeReq == null)
+        if (updateEmployeeReq == null || id == null)
         {
             return BadRequest();
+        }
+        
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
         }
         
         var employee = await _employeeSkillLevelService.GetEmployeeByIdAsync(id);
 
         if (employee == null)
         {
-            return BadRequest();
+            return BadRequest("Employee does not exist");
         }
 
         employee.FirstName = updateEmployeeReq.FirstName;
         employee.LastName = updateEmployeeReq.LastName;
         employee.Dob = updateEmployeeReq.Dob;
         employee.Email = updateEmployeeReq.Email;
-        
-        // check if they have skillLevels first
-        if (employee.SkillLevelIds == null)
-        {
-            employee.SkillLevelIds = new List<ObjectId>();
-        }
-        
+        employee.IsActive = updateEmployeeReq.IsActive;
+        employee.Age = DateTime.Now.Year - updateEmployeeReq.Dob!.Value.Year;
         employee.SkillLevelIds.Clear();
-
+        
         foreach (var updatedEmployeeSkillLevel in updateEmployeeReq.SkillLevelIds)
         {
+            var skillExists = await _employeeSkillLevelService.GetSkillLevelByIdAsync(updatedEmployeeSkillLevel);
+
+            if (skillExists == null)
+            {
+                return BadRequest("Invalid skill entry, the skill doesnt exist");
+            }
+          
             employee.SkillLevelIds.Add(new ObjectId(updatedEmployeeSkillLevel));
         }
         
-        employee.IsActive = updateEmployeeReq.IsActive;
-        employee.Age = DateTime.Now.Year - updateEmployeeReq.Dob!.Value.Year;
-
         var isUpdatedEmployee = await _employeeSkillLevelService.UpdateEmployeeAsync(employee);
 
         return isUpdatedEmployee ? Ok(employee) : BadRequest("Employee Not Updated");
