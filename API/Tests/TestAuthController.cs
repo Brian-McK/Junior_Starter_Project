@@ -167,7 +167,7 @@ public class TestAuthController
         var result = await controller.Authenticate(loginDetails);
 
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-        Assert.Equal("User Not Found", notFoundResult.Value);
+        Assert.Equal("Incorrect Username or password", notFoundResult.Value);
     }
 
     [Fact]
@@ -220,7 +220,8 @@ public class TestAuthController
             }
         };
 
-        var username = AuthMockData.GetUser().Username;
+        var user = AuthMockData.GetUser();
+        var username = user.Username;
         const string validRefreshToken = "validRefreshToken";
         const string newJwtToken = "newJwtToken";
 
@@ -228,6 +229,18 @@ public class TestAuthController
 
         _mockTokenService.Setup(t => t.GetTokenFromCookies(controller.Request, "refreshToken"))
             .Returns(refreshToken);
+
+        _mockEmployeeSkillLevelService.Setup(t => t.GetUserByUsernameAsync(username!)).ReturnsAsync(user);
+
+        var refreshTokenStore = new RefreshTokenStore
+        {
+            Id = "64b52112a10aadfe5792ee9e",
+            Created = DateTime.Today,
+            UserId = user.Id,
+            RefreshToken = refreshToken.Value
+        };
+
+        _mockEmployeeSkillLevelService.Setup((t => t.GetSavedRefreshToken(user.Id, refreshToken.Value))).ReturnsAsync(refreshTokenStore);
         
         _mockTokenService.Setup(t => t.IsValidToken(refreshToken, username!, "Admin"))
             .Returns(true);
@@ -301,6 +314,6 @@ public class TestAuthController
         
         var result = await controller.RefreshToken(username!);
         
-        Assert.IsType<ForbidResult>(result);
+        Assert.IsType<UnauthorizedObjectResult>(result);
     }
 }
