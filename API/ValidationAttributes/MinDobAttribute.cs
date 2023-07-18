@@ -18,7 +18,7 @@ public class MinDobAttribute: ValidationAttribute
             var currentDate = DateTime.Today;
             var minimumDate = currentDate.AddYears(-_minimumAge);
 
-            if (Dob > minimumDate)
+            if (Dob.Date > minimumDate.Date)
             {
                 return new ValidationResult(ErrorMessage);
             }

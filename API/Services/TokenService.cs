@@ -43,7 +43,7 @@ public class TokenService: ITokenService
     
     public string GenerateJwtToken(string username, string role)
     {
-        return GenerateToken(username, TimeSpan.FromMinutes(15), _jwtSecret, role);
+        return GenerateToken(username, TimeSpan.FromMinutes(15), _jwtSecret, role); // demo - change here
     }
     
     public RefreshToken GenerateRefreshToken(string username, string role)
@@ -53,7 +53,7 @@ public class TokenService: ITokenService
         var refreshToken = new RefreshToken
         {
             CreatedDate = DateTime.Now,
-            Expires = DateTime.Now.AddDays(1),
+            Expires = DateTime.Now.AddDays(1), // demo - change here
             Token = refreshTokenString
         };
 
