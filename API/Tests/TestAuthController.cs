@@ -114,8 +114,8 @@ public class TestAuthController
         var refresh = new RefreshToken
         {
             Token = "sdssdssfsfsfsffs",
-            CreatedDate = DateTime.Now.Date,
-            Expires = DateTime.Now.AddDays(1)
+            CreatedDate = DateTime.UtcNow.Date,
+            Expires = DateTime.UtcNow.AddDays(1)
         };
         
         _mockTokenService.Setup(s => s.GenerateRefreshToken(loginDetails.Username!,"Admin"))

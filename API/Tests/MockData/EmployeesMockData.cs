@@ -54,7 +54,7 @@ public class EmployeesMockData
         {
             FirstName = "Mary",
             LastName = "McEntee",
-            Dob = DateTime.Now.AddYears(-19),
+            Dob = DateTime.UtcNow.AddYears(-19),
             Email = "mary@hello.com",
             SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => new ObjectId(item.Id).ToString()).ToList(),
             IsActive = true

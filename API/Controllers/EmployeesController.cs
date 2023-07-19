@@ -74,7 +74,7 @@ public class EmployeesController: ControllerBase
             Email = newEmpReq.Email,
             SkillLevelIds = new List<ObjectId>(),
             IsActive = newEmpReq.IsActive,
-            Age = DateTime.Now.Year - newEmpReq.Dob!.Value.Year
+            Age = DateTime.UtcNow.Year - newEmpReq.Dob!.Value.ToUniversalTime().Year
         };
 
         foreach (var newEmployeeSkillLevelId in newEmpReq.SkillLevelIds)
@@ -119,7 +119,7 @@ public class EmployeesController: ControllerBase
         employee.Dob = updateEmployeeReq.Dob;
         employee.Email = updateEmployeeReq.Email;
         employee.IsActive = updateEmployeeReq.IsActive;
-        employee.Age = DateTime.Now.Year - updateEmployeeReq.Dob!.Value.Year;
+        employee.Age = DateTime.UtcNow.Year - updateEmployeeReq.Dob!.Value.Year;
         employee.SkillLevelIds.Clear();
         
         foreach (var updatedEmployeeSkillLevel in updateEmployeeReq.SkillLevelIds)

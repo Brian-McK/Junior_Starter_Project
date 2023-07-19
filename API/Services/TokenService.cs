@@ -43,17 +43,17 @@ public class TokenService: ITokenService
     
     public string GenerateJwtToken(string username, string role)
     {
-        return GenerateToken(username, TimeSpan.FromMinutes(15), _jwtSecret, role); // demo - change here
+        return GenerateToken(username, TimeSpan.FromSeconds(30), _jwtSecret, role); // demo - change here
     }
     
     public RefreshToken GenerateRefreshToken(string username, string role)
     {
-        var refreshTokenString = GenerateToken(username, TimeSpan.FromDays(1), _refreshTokenSecret, role);
+        var refreshTokenString = GenerateToken(username, TimeSpan.FromDays(1), _refreshTokenSecret, role); // demo - change here
 
         var refreshToken = new RefreshToken
         {
-            CreatedDate = DateTime.Now,
-            Expires = DateTime.Now.AddDays(1), // demo - change here
+            CreatedDate = DateTime.UtcNow,
+            Expires = DateTime.UtcNow.AddDays(1), // demo - change here
             Token = refreshTokenString
         };
 
@@ -111,7 +111,7 @@ public class TokenService: ITokenService
         try
         {
             principal = tokenHandler.ValidateToken(token.Value.Value, validationParameters, out var validatedToken);
-            isValidDate = validatedToken.ValidTo > DateTime.Now;
+            isValidDate = validatedToken.ValidTo > DateTime.UtcNow;
         }
         catch (SecurityTokenException ex)
         {

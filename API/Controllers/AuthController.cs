@@ -57,7 +57,6 @@ public class AuthController: ControllerBase
         {
             return BadRequest(ModelState);
         }
-
         var user = await _employeeSkillLevelService.GetUserByUsernameAsync(loginDetails.Username);
 
         if (user == null)

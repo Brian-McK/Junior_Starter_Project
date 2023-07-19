@@ -15,10 +15,10 @@ public class MinDobAttribute: ValidationAttribute
     {
         if (value is DateTime Dob)
         {
-            var currentDate = DateTime.Today;
+            var currentDate = DateTime.UtcNow;
             var minimumDate = currentDate.AddYears(-_minimumAge);
 
-            if (Dob.Date > minimumDate.Date)
+            if (Dob.Date.ToUniversalTime() > minimumDate.Date)
             {
                 return new ValidationResult(ErrorMessage);
             }
