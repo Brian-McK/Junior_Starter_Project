@@ -18,6 +18,8 @@ public class EmployeeRepository: IEmployeeRepository
     
     public async Task<IEnumerable<Employee>> GetAllAsync()
     {
+        // TODO - DONT NEED NOW?
+        
         var pipeline = _mongoDbContext.Employees.Aggregate()
             .Lookup(
                 foreignCollection: _mongoDbContext.SkillLevels,
@@ -43,12 +45,20 @@ public class EmployeeRepository: IEmployeeRepository
 
     public async Task AddAsync(Employee employee)
     {
+        var skillLevelPipeline = await GetSkillLevelPipeline(employee).ToListAsync();
+
+        employee.SkillLevels = skillLevelPipeline; 
+
         await _mongoDbContext.Employees.InsertOneAsync(employee);
     }
 
     public async Task<bool> UpdateAsync(Employee employee)
     {
-      var updateResult = await _mongoDbContext.Employees.ReplaceOneAsync(p => p.Id == employee.Id, employee);
+        var skillLevelPipeline = await GetSkillLevelPipeline(employee).ToListAsync();
+
+        employee.SkillLevels = skillLevelPipeline; 
+
+        var updateResult = await _mongoDbContext.Employees.ReplaceOneAsync(p => p.Id == employee.Id, employee);
 
       return updateResult.ModifiedCount > 0;
     }
@@ -58,5 +68,11 @@ public class EmployeeRepository: IEmployeeRepository
       var deleteResult = await _mongoDbContext.Employees.DeleteOneAsync(p => p.Id.Equals(id));
 
       return deleteResult.DeletedCount > 0;
+    }
+    
+    private IAggregateFluent<SkillLevel> GetSkillLevelPipeline(Employee employee)
+    {
+        return _mongoDbContext.SkillLevels.Aggregate()
+            .Match(sl => employee.SkillLevelIds.Contains((ObjectId)(BsonValue)sl.Id));
     }
 }

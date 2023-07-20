@@ -56,4 +56,44 @@ public class SkillLevelsController: ControllerBase
 
         return CreatedAtAction(nameof(GetSkillLevelById), new { id = newSkillLevel.Id }, newSkillLevel);
     }
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> EditSkillLevelDetails(string? id, [FromBody] SkillLevelCreateDto? skillLevelUpdateReq)
+    {
+        if (id == null || skillLevelUpdateReq == null)
+        {
+            return BadRequest();
+        }
+
+        var skillLevel = await _employeeSkillLevelService.GetSkillLevelByIdAsync(id);
+
+        if (skillLevel == null)
+        {
+            return NotFound();
+        }
+
+        var updatedSkill = new SkillLevel
+        {
+            Id = skillLevel.Id,
+            Name = skillLevelUpdateReq.Name,
+            Description = skillLevelUpdateReq.Description
+        };
+
+        var isUpdatedSkill = await _employeeSkillLevelService.UpdateSkillLevelAsync(updatedSkill);
+
+        return isUpdatedSkill ? Ok() : BadRequest();
+    }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteSkillLevel(string? id)
+    {
+        if (id == null)
+        {
+            return BadRequest();
+        }
+
+        var requestResult = await _employeeSkillLevelService.DeleteSkillLevelAsync(id);
+
+        return requestResult ? NoContent() : NotFound();
+    }
 }
