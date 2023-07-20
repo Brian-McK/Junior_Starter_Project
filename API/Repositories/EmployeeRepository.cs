@@ -18,24 +18,21 @@ public class EmployeeRepository: IEmployeeRepository
     
     public async Task<IEnumerable<Employee>> GetAllAsync()
     {
-        // TODO - DONT NEED NOW?
-        
-        var pipeline = _mongoDbContext.Employees.Aggregate()
-            .Lookup(
-                foreignCollection: _mongoDbContext.SkillLevels,
-                localField: e => e.SkillLevelIds, // Property in the "employees" collection referencing skill levels
-                foreignField: sl => sl.Id, // ID property in the "skillLevels" collection
-                @as: (Employee e) => e.SkillLevels // Property in the "employees" collection to store the joined skill levels
-            );
+        var pipeline = CreateEmployeePipeline();
         
         var result = await pipeline.ToListAsync();
-
+        
         return result;
     }
 
     public async Task<Employee> GetByIdAsync(string id)
     {
-        return await _mongoDbContext.Employees.Find(p => p.Id.Equals(id)).FirstOrDefaultAsync();
+        var pipeline = CreateEmployeePipeline()
+            .Match(Builders<Employee>.Filter.Eq(e => e.Id, id));
+
+        var result = await pipeline.FirstOrDefaultAsync();
+        
+        return result;
     }
     
     public async Task<Employee> GetByEmailAsync(string email)
@@ -74,5 +71,16 @@ public class EmployeeRepository: IEmployeeRepository
     {
         return _mongoDbContext.SkillLevels.Aggregate()
             .Match(sl => employee.SkillLevelIds.Contains((ObjectId)(BsonValue)sl.Id));
+    }
+    
+    private IAggregateFluent<Employee> CreateEmployeePipeline()
+    {
+        return _mongoDbContext.Employees.Aggregate()
+            .Lookup(
+                foreignCollection: _mongoDbContext.SkillLevels,
+                localField: e => e.SkillLevelIds,
+                foreignField: sl => sl.Id, 
+                @as: (Employee e) => e.SkillLevels 
+            );
     }
 }
