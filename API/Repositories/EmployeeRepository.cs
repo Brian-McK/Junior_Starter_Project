@@ -18,17 +18,9 @@ public class EmployeeRepository: IEmployeeRepository
     
     public async Task<IEnumerable<Employee>> GetAllAsync()
     {
-        var pipeline = _mongoDbContext.Employees.Aggregate()
-            .Lookup(
-                foreignCollection: _mongoDbContext.SkillLevels,
-                localField: e => e.SkillLevelIds, // Property in the "employees" collection referencing skill levels
-                foreignField: sl => sl.Id, // ID property in the "skillLevels" collection
-                @as: (Employee e) => e.SkillLevels // Property in the "employees" collection to store the joined skill levels
-            );
-        
-        var result = await pipeline.ToListAsync();
+        var employees = await _mongoDbContext.Employees.Find(_ => true).ToListAsync();
 
-        return result;
+        return employees;
     }
 
     public async Task<Employee> GetByIdAsync(string id)
