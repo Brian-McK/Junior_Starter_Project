@@ -38,58 +38,20 @@ public class SkillLevelRepository: ISkillLevelRepository
     {
         await _mongoDbContext.SkillLevels.InsertOneAsync(skillLevel);
     }
-
-    // TODO - Re-write to use a transaction instead
+    
     public async Task<bool> UpdateAsync(SkillLevel skillLevel)
     {
-      var updateSkillLevelResult = await _mongoDbContext.SkillLevels.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
-      
-      if (updateSkillLevelResult.ModifiedCount > 0)
-      {
-          return await UpdatedEmployeesWithSkillLevelMutations(skillLevel, "update");
-      }
+        var updateSkillLevelResult =
+            await _mongoDbContext.SkillLevels.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
 
-      return false;
+        return updateSkillLevelResult.ModifiedCount > 0;
     }
 
-    // TODO - Re-write to use a transaction instead
+    // TODO - Re-write to use a transaction instead - Delete a skill level should delete it in each employees skill level id array too
     public async Task<bool> DeleteAsync(string id)
     {
-        var skillLevel = await _mongoDbContext.SkillLevels.Find(s => s.Id.Equals(id)).FirstOrDefaultAsync();
-    
-        if (skillLevel == null)
-        {
-            return false;
-        }
+        var deleteSkillResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(s => s.Id.Equals(id));
         
-        var deleteResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(s => s.Id.Equals(skillLevel.Id));
-    
-        if (deleteResult.DeletedCount > 0)
-        {
-            return await UpdatedEmployeesWithSkillLevelMutations(skillLevel, "delete");
-        }
-        
-        return false;
-    }
-    
-    private async Task<bool> UpdatedEmployeesWithSkillLevelMutations(SkillLevel skillLevelMutated, string mutationType)
-    {
-        if (mutationType == "delete")
-        {
-            var skillLevelId = ObjectId.Parse(skillLevelMutated.Id);
-
-            var employeeSkillIdsFilter = Builders<Employee>.Filter.AnyEq("SkillLevelIds", skillLevelId);
-            var updateSkillIds = Builders<Employee>.Update.Pull("SkillLevelIds", skillLevelId);
-            var updatedEmployeesSkillLevelIds = await _mongoDbContext.Employees.UpdateManyAsync(employeeSkillIdsFilter, updateSkillIds);
-
-            if (updatedEmployeesSkillLevelIds.ModifiedCount <= 0)
-                return false;
-        }
-
-        var employeeSkillsFilter = Builders<Employee>.Filter.ElemMatch(e => e.SkillLevels, s => s.Id == skillLevelMutated.Id);
-        var updateSkillLevels = Builders<Employee>.Update.Set("SkillLevels", skillLevelMutated);
-        var updatedEmployeesSkillLevels =  await _mongoDbContext.Employees.UpdateManyAsync(employeeSkillsFilter, updateSkillLevels);
-
-        return updatedEmployeesSkillLevels.ModifiedCount > 0;
+        return deleteSkillResult.DeletedCount > 0;
     }
 }
