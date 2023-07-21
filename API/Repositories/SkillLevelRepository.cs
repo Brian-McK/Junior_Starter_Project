@@ -1,7 +1,10 @@
 ﻿using API.Data;
 using API.Interfaces;
 using API.Models;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using BsonObjectId = Newtonsoft.Json.Bson.BsonObjectId;
 
 namespace API.Repositories;
 
@@ -35,18 +38,20 @@ public class SkillLevelRepository: ISkillLevelRepository
     {
         await _mongoDbContext.SkillLevels.InsertOneAsync(skillLevel);
     }
-
+    
     public async Task<bool> UpdateAsync(SkillLevel skillLevel)
     {
-      var updateSkillLevelResult = await _mongoDbContext.SkillLevels.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
+        var updateSkillLevelResult =
+            await _mongoDbContext.SkillLevels.ReplaceOneAsync(p => p.Id == skillLevel.Id, skillLevel);
 
-      return updateSkillLevelResult.ModifiedCount > 0;
+        return updateSkillLevelResult.ModifiedCount > 0;
     }
 
+    // TODO - Re-write to use a transaction instead - Delete a skill level should delete it in each employees skill level id array too
     public async Task<bool> DeleteAsync(string id)
     {
-       var deleteSkillLevelResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(p => p.Id.Equals(id));
-
-       return deleteSkillLevelResult.DeletedCount > 0;
+        var deleteSkillResult = await _mongoDbContext.SkillLevels.DeleteOneAsync(s => s.Id.Equals(id));
+        
+        return deleteSkillResult.DeletedCount > 0;
     }
 }
