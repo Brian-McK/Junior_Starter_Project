@@ -237,7 +237,7 @@ public class TestEmployeesController
             LastName = updateEmployeeRequest.LastName,
             Dob = updateEmployeeRequest.Dob,
             Email = updateEmployeeRequest.Email,
-            SkillLevelIds = updateEmployeeRequest.SkillLevelIds.Select(ObjectId.Parse).ToList(),
+            SkillLevelIds = updateEmployeeRequest.SkillLevelIds,
             IsActive = updateEmployeeRequest.IsActive
         };
         

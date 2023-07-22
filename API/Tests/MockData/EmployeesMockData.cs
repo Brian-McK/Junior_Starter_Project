@@ -20,8 +20,7 @@ public class EmployeesMockData
                 Dob = DateTime.ParseExact("26/10/1991", "dd/MM/yyyy", null),
                 Email = "lsweetland0@mashable.com",
                 IsActive = true,
-                SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => new ObjectId(item.Id)).ToList(),
-                SkillLevels = SkillLevelsMockData.GetSkillLevels()
+                SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => item.Id).ToList(),
             },
             new Employee
             {
@@ -31,8 +30,7 @@ public class EmployeesMockData
                 Dob = DateTime.ParseExact("13/06/1992", "dd/MM/yyyy", null),
                 Email = "cloomis4@naver.com",
                 IsActive = false,
-                SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => new ObjectId(item.Id)).ToList().GetRange(1,2),
-                SkillLevels = SkillLevelsMockData.GetSkillLevels().GetRange(1, 2)
+                SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => item.Id).ToList().GetRange(1,2),
             },
             new Employee
             {
@@ -42,8 +40,7 @@ public class EmployeesMockData
                 Dob = DateTime.ParseExact("13/09/1989", "dd/MM/yyyy", null),
                 Email = "crolline@istockphoto.com",
                 IsActive = true,
-                SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => new ObjectId(item.Id)).ToList().GetRange(0,1),
-                SkillLevels = SkillLevelsMockData.GetSkillLevels().GetRange(0, 1)
+                SkillLevelIds = SkillLevelsMockData.GetSkillLevels().Select(item => item.Id).ToList().GetRange(0,1),
             },
         };
     }

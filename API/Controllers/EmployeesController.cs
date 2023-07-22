@@ -72,7 +72,7 @@ public class EmployeesController: ControllerBase
             LastName = newEmpReq.LastName!,
             Dob = newEmpReq.Dob,
             Email = newEmpReq.Email,
-            SkillLevelIds = new List<ObjectId>(),
+            SkillLevelIds = new List<string>(),
             IsActive = newEmpReq.IsActive,
             Age = DateTime.UtcNow.Year - newEmpReq.Dob!.Value.ToUniversalTime().Year
         };
@@ -86,7 +86,7 @@ public class EmployeesController: ControllerBase
               return BadRequest("Invalid skill entry, the skill doesnt exist");
           }
           
-          newEmployee.SkillLevelIds.Add(new ObjectId(newEmployeeSkillLevelId));
+          newEmployee.SkillLevelIds.Add(newEmployeeSkillLevelId);
         }
 
         await _employeeSkillLevelService.AddEmployeeAsync(newEmployee);
@@ -131,7 +131,7 @@ public class EmployeesController: ControllerBase
                 return BadRequest("Invalid skill entry, the skill doesnt exist");
             }
           
-            employee.SkillLevelIds.Add(new ObjectId(updatedEmployeeSkillLevel));
+            employee.SkillLevelIds.Add(updatedEmployeeSkillLevel);
         }
         
         var isUpdatedEmployee = await _employeeSkillLevelService.UpdateEmployeeAsync(employee);
