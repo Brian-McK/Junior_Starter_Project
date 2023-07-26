@@ -32,6 +32,7 @@
       <None Remove="packages\xunit.assert.2.1.0\lib\portable-net45+win8+wp8+wpa81\xunit.assert.xml" />
       <None Remove="packages\xunit.assert.2.1.0\.signature.p7s" />
       <None Remove="packages\xunit.abstractions.2.0.0\xunit.abstractions.2.0.0.nupkg" />
+      <None Remove="Tests\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -50,6 +51,15 @@
       <Content Update="appsettings.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <Content Remove="Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Tests\**" />
     </ItemGroup>
 
 </Project>

@@ -12,7 +12,7 @@ public interface ITokenService
 
     KeyValuePair<string, string>? GetTokenFromCookies(HttpRequest request, string tokenName);
 
-    bool IsValidToken(KeyValuePair<string, string>? token, string username, string role);
+    bool IsValidToken(string token, string username);
 
     void AssignRefreshTokenToCookie(HttpResponse response, string cookieName, RefreshToken refreshToken);
 

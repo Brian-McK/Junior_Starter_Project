@@ -92,7 +92,7 @@ public class TokenService: ITokenService
         });
     }
     
-    public bool IsValidToken(KeyValuePair<string, string>? token, string username, string role)
+    public bool IsValidToken(string token, string username)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -110,7 +110,7 @@ public class TokenService: ITokenService
 
         try
         {
-            principal = tokenHandler.ValidateToken(token.Value.Value, validationParameters, out var validatedToken);
+            principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
             isValidDate = validatedToken.ValidTo > DateTime.UtcNow;
         }
         catch (SecurityTokenException ex)
@@ -118,7 +118,7 @@ public class TokenService: ITokenService
             Console.WriteLine(ex);
         }
 
-        var isAdmin = principal.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == role);
+        var isAdmin = principal.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         var isUser = principal.HasClaim(c => c.Type == JwtRegisteredClaimNames.Name && c.Value == username);
 
         return isAdmin && isUser && isValidDate;

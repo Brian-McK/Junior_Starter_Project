@@ -134,13 +134,12 @@ public class AuthController: ControllerBase
             return Unauthorized("Invalid Token, You have been logged out");
         }
         
-        // extract role from claims?
-        const string role = "Admin";
-
-        if (!_tokenService.IsValidToken(cookieRefreshToken, username, role))
+        if (!_tokenService.IsValidToken(cookieRefreshToken.Value.Value, username))
         {
             return Forbid();
         }
+        
+        const string role = "Admin";
 
         var newJwtToken = _tokenService.GenerateJwtToken(username, role);
 
