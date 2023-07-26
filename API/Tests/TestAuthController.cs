@@ -242,7 +242,7 @@ public class TestAuthController
 
         _mockEmployeeSkillLevelService.Setup((t => t.GetSavedRefreshToken(user.Id, refreshToken.Value))).ReturnsAsync(refreshTokenStore);
         
-        _mockTokenService.Setup(t => t.IsValidToken(refreshToken, username!, "Admin"))
+        _mockTokenService.Setup(t => t.IsValidToken(refreshToken.Value, username!))
             .Returns(true);
         
         _mockTokenService.Setup(t => t.GenerateJwtToken(username!, "Admin"))
@@ -309,7 +309,7 @@ public class TestAuthController
         _mockTokenService.Setup(t => t.GetTokenFromCookies(controller.Request, "refreshToken"))
             .Returns(validRefreshToken);
         
-        _mockTokenService.Setup(t => t.IsValidToken(validRefreshToken, username!, "Admin"))
+        _mockTokenService.Setup(t => t.IsValidToken(validRefreshToken.Value, username!))
             .Returns(false);
         
         var result = await controller.RefreshToken(username!);
